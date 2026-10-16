@@ -21,6 +21,7 @@ button { font: inherit; cursor: pointer; }
 .logo { font-size: 38px; font-weight: 800; letter-spacing: -1.5px; color: var(--yellow); line-height: 1; }
 .hdr-actions { display: flex; align-items: center; gap: 28px; color: #fff; font-size: 14px; font-weight: 600; position: relative; }
 .hdr-actions .login { display: flex; align-items: center; gap: 8px; background: none; border: 0; color: #fff; font-weight: 600; padding: 0; }
+.hdr-actions .login .ico-building { width: 24px; height: 24px; filter: brightness(0) invert(1); }
 .hdr-actions .login:hover { text-decoration: underline; text-underline-offset: 4px; }
 .hdr button:focus-visible { outline-color: var(--yellow); }
 html[data-type="makro"] .hdr-actions { font-size: 16px; }
@@ -39,16 +40,18 @@ html[data-type="makro"] .hdr-actions { font-size: 16px; }
 .shell { display: grid; grid-template-columns: 280px minmax(0, 800px); gap: 40px; align-items: start; }
 .shell.in-crumbs { margin-top: -0px; }
 .side { align-self: start; }
+.side .who-box, .nav-group { background: var(--panel); padding: 8px; }
+.side .who-box { padding: 16px 8px 8px; }
 .side .who { padding: 0 10px 12px; }
 .side .who b { color: var(--ink-strong); display: block; font-weight: var(--strong); }
 .side .who span { font-size: var(--fs-small); color: var(--muted); }
 .side .btn.soft { margin: 0 10px 8px; width: calc(100% - 20px); }
-.nav-group { margin-top: 16px; }
-.nav-group h3 { font-size: var(--fs-small); font-weight: 400; color: var(--muted); padding: 0 10px 4px; }
+.nav-group { margin-top: 12px; }
+.nav-group h3 { font-size: var(--fs-small); font-weight: 400; color: var(--muted); padding: 6px 10px 4px; }
 .nav-a { display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--ink-strong); text-decoration: none; font-weight: var(--strong); transition: background-color .15s; }
 .nav-a svg { width: 18px; height: 18px; color: var(--navy); flex: none; }
-.nav-a:hover { background: var(--info); }
-.nav-a[aria-current="page"] { background: var(--info); }
+.nav-a:hover { background: #fff; }
+.nav-a[aria-current="page"] { background: #fff; box-shadow: inset 4px 0 0 var(--blue); }
 .nav-a .lock { margin-left: auto; color: var(--muted); }
 .nav-a .lock svg { width: 14px; height: 14px; color: var(--muted); }
 .content { max-width: 800px; min-width: 0; }
