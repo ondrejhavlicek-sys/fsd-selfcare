@@ -93,7 +93,7 @@
     document.documentElement.dataset.type = S.type === 'makro' ? 'makro' : 'figma';
     const app = document.getElementById('app');
     const cur = r.id;
-    const crumbs = r.hub ? '' : `<nav class="crumbs" aria-label="Drobečková navigace"><a href="#/ucet/company">Firemní účet</a> · ${esc(App.pages[cur].label)}</nav>`;
+    const crumbs = r.hub ? '' : `<nav class="crumbs" aria-label="Drobečková navigace"><ul><li><a href="#/ucet/company">Firemní účet</a></li><li><span class="sep" aria-hidden="true"></span><a href="#/ucet/${cur}" aria-current="page">${esc(App.pages[cur].label)}</a></li></ul></nav>`;
     app.innerHTML = header() + `<div class="page ${r.hub ? 'on-hub' : ''}">${crumbs}<div class="shell">${sidebar(cur)}<main class="content" id="main">
       ${r.hub ? hub() : `<a class="back" href="#/ucet"><i aria-hidden="true">←</i>Firemní účet</a>` + body(cur)}</main></div></div>` + scenarioBox();
     document.title = (r.hub ? 'Firemní účet' : App.pages[cur].label) + ' – makro distribuce';
