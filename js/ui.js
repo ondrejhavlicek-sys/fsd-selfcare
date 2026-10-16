@@ -23,7 +23,9 @@ window.UI = (function () {
     cart: 'M3 4h2l2.5 11h11L21 7H6M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
     menu: 'M4 7h16M4 12h16M4 17h16'
   };
-  const icon = (n, cls) => `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || ''}"/></svg>`;
+  const icon = (n, cls) => n === 'company'
+    ? `<img class="${cls || ''}" src="assets/icons/building-outline.svg" width="24" height="24" alt="">`
+    : `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || ''}"/></svg>`;
 
   const alertBox = (type, title, text, extra) =>
     `<div class="alert ${type}" role="${type === 'err' ? 'alert' : 'status'}">${icon(type === 'ok' ? 'ok' : type === 'err' ? 'err' : type === 'warn' ? 'warn' : 'info')}<div><b>${esc(title)}</b>${text ? esc(text) : ''}${extra || ''}</div></div>`;
