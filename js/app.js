@@ -42,7 +42,7 @@
 
   function header() {
     const c = App.S.company;
-    const user = '<img class="ico-building" src="assets/icons/building-outline.svg" width="24" height="24" alt="">';
+    const user = icon('company', 'ico-building');
     return `<header class="hdr">
       <a class="brand" href="#/ucet"><span class="logo">makro</span><span>distribuce</span></a>
       <div class="hdr-actions">

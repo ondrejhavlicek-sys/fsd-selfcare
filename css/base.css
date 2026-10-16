@@ -49,7 +49,7 @@ html[data-type="makro"] .hdr-actions { font-size: 16px; }
 .nav-group { margin-top: 12px; }
 .nav-group h3 { font-size: var(--fs-small); font-weight: 400; color: var(--muted); padding: 6px 10px 4px; }
 .nav-a { display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--ink-strong); text-decoration: none; font-weight: var(--strong); transition: background-color .15s; }
-.nav-a svg { width: 18px; height: 18px; color: var(--navy); flex: none; }
+.nav-a svg, .nav-a > img { width: 18px; height: 18px; color: var(--navy); flex: none; }
 .nav-a:hover { background: #fff; }
 .nav-a[aria-current="page"] { background: #fff; box-shadow: inset 4px 0 0 var(--blue); }
 .nav-a .lock { margin-left: auto; color: var(--muted); }
