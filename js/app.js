@@ -42,17 +42,16 @@
 
   function header() {
     const c = App.S.company;
-    return `<header class="hdr"><div class="hdr-in">
-      <a class="logo" href="#/ucet"><i></i>makro distribuce</a>
-      <div class="hdr-search"><input type="search" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" disabled></div>
-      <div class="hdr-right">
-        <button class="hdr-btn" data-act="cart" aria-label="Košík">${icon('cart')}<span class="lbl">0,00 Kč</span></button>
-        <button class="hdr-btn" data-act="acct" aria-haspopup="true" aria-expanded="${App.S.pop}">${icon('company')}<span class="lbl">Firemní účet<small>${esc(c.name)}</small></span></button>
+    const user = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.9547 7.36563C16.9547 10.4799 15.2033 12.2313 12.089 12.2313C8.9748 12.2313 7.22341 10.4813 7.22341 7.36563C7.22341 4.24997 8.9748 2.5 12.089 2.5C15.2033 2.5 16.9547 4.2514 16.9547 7.36563ZM3.76633 16.4012C6.22957 14.7554 9.12657 13.8792 12.089 13.8841C15.1661 13.8841 18.0304 14.8112 20.4117 16.4012C21.0117 16.8026 21.4117 17.3326 21.5831 17.9297C21.7546 18.5211 21.6903 19.1283 21.4546 19.6611C20.9846 20.724 19.8432 21.5039 18.4261 21.5039H5.75343C4.33632 21.5039 3.19491 20.724 2.72492 19.6611C2.47847 19.1169 2.43291 18.5029 2.59635 17.9283C2.76777 17.3326 3.16634 16.8026 3.76633 16.4012Z" fill="#fff"/></svg>`;
+    return `<header class="hdr">
+      <a class="brand" href="#/ucet"><span class="logo">makro</span><span>distribuce</span></a>
+      <div class="hdr-actions">
+        <button class="login" data-act="acct" aria-haspopup="true" aria-expanded="${App.S.pop}" aria-label="Firemní účet: ${esc(c.name)}">${user}<span>Firemní účet</span></button>
         ${App.S.pop ? `<div class="pop" role="menu"><div class="co">${esc(c.name)}</div><div class="ico">IČ: ${esc(c.ico)} · ${ROLE_NAMES[App.S.role]}</div>
           <button class="btn soft sm" style="width:100%" data-act="personal">Přepnout na osobní účet</button><hr>
           ${GROUPS.flatMap(g => g.pages).map(id => `<a class="item" role="menuitem" href="#/ucet/${id}">${esc(App.pages[id].label)}</a>`).join('')}
           <hr><a class="item" href="#" data-act="logout">Odhlásit se</a></div>` : ''}
-      </div></div></header>`;
+      </div></header>`;
   }
 
   function sidebar(cur) {
@@ -82,7 +81,7 @@
   function scenarioBox() {
     const S = App.S;
     const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${l}</option>`;
-    return `<div class="scn"><button data-act="scn">Prototype scenarios ${S.scn ? '–' : '+'}</button>${S.scn ? `<div class="scn-body">
+    return `<div class="scn"><button data-act="scn">${S.scn ? '▾' : '▸'} Prototype scenarios</button>${S.scn ? `<div class="scn-body">
       <label>Role přihlášeného uživatele<select data-sel="role">${opt('admin', 'Správce', S.role)}${opt('buyer', 'Nákupčí', S.role)}${opt('viewer', 'Prohlížející', S.role)}</select></label>
       <label>Stav seznamů<select data-sel="scenario">${opt('normal', 'Běžný', S.scenario)}${opt('empty', 'Prázdný', S.scenario)}${opt('loading', 'Načítání', S.scenario)}${opt('error', 'Chyba', S.scenario)}</select></label>
       <label>Typography<select data-sel="type">${opt('figma', 'Figma (Inter)', S.type)}${opt('makro', 'makro.cz (Lato)', S.type)}</select></label>
@@ -94,9 +93,9 @@
     document.documentElement.dataset.type = S.type === 'makro' ? 'makro' : 'figma';
     const app = document.getElementById('app');
     const cur = r.id;
-    const crumbs = r.hub ? '' : `<nav class="crumbs" aria-label="Drobečková navigace"><a href="#/ucet">Domů</a> → <a href="#/ucet/company">Firemní účet</a> → ${esc(App.pages[cur].label)}</nav>`;
+    const crumbs = r.hub ? '' : `<nav class="crumbs" aria-label="Drobečková navigace"><a href="#/ucet/company">Firemní účet</a> · ${esc(App.pages[cur].label)}</nav>`;
     app.innerHTML = header() + `<div class="page ${r.hub ? 'on-hub' : ''}">${crumbs}<div class="shell">${sidebar(cur)}<main class="content" id="main">
-      ${r.hub ? hub() : `<a class="back" href="#/ucet" role="button">‹ Firemní účet</a>` + body(cur)}</main></div></div>` + scenarioBox();
+      ${r.hub ? hub() : `<a class="back" href="#/ucet"><i aria-hidden="true">←</i>Firemní účet</a>` + body(cur)}</main></div></div>` + scenarioBox();
     document.title = (r.hub ? 'Firemní účet' : App.pages[cur].label) + ' – makro distribuce';
   }
 
@@ -108,7 +107,6 @@
     const act = el.dataset.act;
     const core = {
       acct() { if (mobile()) location.hash = '#/ucet'; else { App.S.pop = !App.S.pop; render(); } },
-      cart() { UI.toast('Košík není součástí tohoto prototypu.'); },
       personal() { UI.toast('Přepnutí na osobní účet není součástí prototypu.'); },
       logout() { e.preventDefault(); App.S.pop = false; render(); UI.toast('Odhlášení není součástí prototypu.'); },
       scn() { App.S.scn = !App.S.scn; render(); },

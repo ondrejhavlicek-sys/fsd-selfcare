@@ -65,9 +65,9 @@ window.UI = (function () {
     ov.innerHTML = `<form class="dlg ${o.wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="dlg-t" novalidate>
       <div class="grab"></div>
       <div class="dlg-h"><div><h2 id="dlg-t">${esc(o.title)}</h2>${o.sub ? `<p class="muted">${esc(o.sub)}</p>` : ''}</div>
-        <button type="button" class="icon-btn" data-close aria-label="Zavřít">${icon('close')}</button></div>
+        <button type="button" class="x" data-close aria-label="Zavřít">${icon('close')}</button></div>
       <div class="dlg-body">${o.body || ''}</div>
-      <div class="dlg-f">${o.submit === null ? '' : `<button class="btn ${o.danger ? 'danger' : ''}" type="submit">${esc(o.submit || 'Uložit')}</button>`}<button type="button" class="btn soft" data-close>${esc(o.cancel || 'Zrušit')}</button></div></form>`;
+      <div class="dlg-f">${o.submit === null ? '' : `<button class="btn ${o.danger ? 'danger' : ''}" type="submit">${esc(o.submit || 'Uložit')}</button>`}<button type="button" class="link" data-close>${esc(o.cancel || 'Zrušit')}</button></div></form>`;
     document.body.appendChild(ov);
     document.addEventListener('keydown', onKey);
     const form = ov.querySelector('form');

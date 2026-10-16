@@ -21,7 +21,7 @@
           const st = STATUS[u.status];
           const nm = (u.first + ' ' + u.last).trim();
           return `<tr><td data-label="Kolega"><span class="email">${esc(u.email)}</span>${nm ? `<br><span class="muted">${esc(nm)}</span>` : ''}</td>
-            <td data-label="Role">${esc(MockData.roles[u.role].label)}</td><td data-label="Provozovny">${esc(sitesText(u))}</td>
+            <td data-label="Role"><span class="role">${esc(MockData.roles[u.role].label)}</span></td><td data-label="Provozovny">${esc(sitesText(u))}</td>
             <td data-label="Stav"><span class="badge ${st[1]}">${st[0]}</span></td>
             <td class="acts-td"><div class="acts"><button class="tbtn" data-act="u-edit" data-id="${u.id}">Upravit</button>
             ${u.status === 'invited' ? `<button class="tbtn" data-act="u-resend" data-id="${u.id}">Odeslat znovu</button>` : `<button class="tbtn" data-act="u-block" data-id="${u.id}">${u.status === 'blocked' ? 'Odblokovat' : 'Zablokovat'}</button>`}
@@ -37,7 +37,7 @@
     return (u.id ? `<div class="fld"><label>E-mail</label><b>${esc(u.email)}</b></div>` : field('E-mail kolegy', 'email', '', { type: 'email', req: true, ph: 'např. jmeno@firma.cz' })) +
       `<div class="row2">${field('Jméno', 'first', u.first)}${field('Příjmení', 'last', u.last)}</div>
       <div class="lbl-t" style="margin-bottom:6px">Role</div>
-      ${Object.keys(R).map(k => `<label class="tile"><input type="radio" name="role" value="${k}" ${u.role === k ? 'checked' : ''}><div><b>${R[k].label}</b><span>${esc(R[k].desc)}</span></div></label>`).join('')}
+      <div class="tiles">${Object.keys(R).map(k => `<label class="tile"><input type="radio" name="role" value="${k}" ${u.role === k ? 'checked' : ''}><div><b>${R[k].label}</b><span>${esc(R[k].desc)}</span></div></label>`).join('')}</div>
       <div id="sites-box" ${u.role === 'admin' ? 'hidden' : ''}><div class="lbl-t" style="margin:12px 0 6px">Provozovny, pro které smí nakupovat</div>
         <label class="check"><input type="radio" name="scope" value="all" ${all ? 'checked' : ''}><span>Všechny provozovny</span></label>
         <label class="check"><input type="radio" name="scope" value="some" ${all ? '' : 'checked'}><span>Jen vybrané provozovny</span></label>
