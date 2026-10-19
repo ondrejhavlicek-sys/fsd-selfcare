@@ -49,10 +49,6 @@
 .cp-foot .row { display: flex; justify-content: space-between; font-size: 13px; }
 .cp-foot .row b { font-size: 15px; }
 .cp-empty { padding: 28px 16px; text-align: center; color: var(--muted); margin: 0; }
-.stepper { display: inline-flex; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 99px; height: 32px; }
-.stepper button { width: 32px; height: 30px; border: 0; background: none; font-size: 18px; line-height: 1; color: var(--blue); border-radius: 99px; }
-.stepper button:hover { background: var(--soft); }
-.stepper span { min-width: 22px; text-align: center; font-weight: 600; font-size: 13px; }
 
 /* listing page */
 .page.wide { max-width: none; margin: 16px 0 80px; padding: 0 var(--hdr-pad); }
@@ -74,25 +70,8 @@
 .sel { display: flex; align-items: center; gap: 4px; }
 .sel img { width: 20px; height: 20px; }
 .sel select { appearance: none; -webkit-appearance: none; border: 0; background: #fff url("../assets/icons/shop/chevron-down.svg") right center / 20px no-repeat; font: inherit; font-size: 14px; color: #222; padding: 8px 24px 8px 0; height: 36px; }
-.grid-shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(164px, 1fr)); gap: 24px 16px; }
-.pcard { display: flex; flex-direction: column; gap: 2px; background: #fff; min-width: 0; }
-.pimg { position: relative; aspect-ratio: 1; background: #f3f3f3; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.pimg img.ph { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: darken; }
-.pcta { position: absolute; right: 6px; bottom: 6px; }
-.add { width: 40px; height: 40px; border-radius: 99px; background: var(--blue); border: 1px solid #fff; display: grid; place-items: center; padding: 0; }
-.add:hover { background: var(--blue-hover); }
-.add svg { width: 20px; height: 20px; }
-.pdata { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; }
-.price-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; min-height: 28px; }
-.pr { display: inline-flex; gap: 2px; font-weight: 700; color: #222; height: 28px; align-items: flex-start; }
-.pr b { font-size: 24px; line-height: 28px; }
-.pr sup { font-size: 12px; line-height: 18px; vertical-align: baseline; }
-.pr.tag { background: #990052; color: #fff; padding: 0 4px; border-radius: 4px; }
-.old { color: #666; text-decoration: line-through; font-size: 14px; line-height: 18px; padding: 0 4px; }
-.mk { font-size: 14px; line-height: 18px; color: #222; padding: 0 4px; font-weight: 500; }
-.psingle { font-size: 14px; color: #222; padding: 0 4px; margin-top: -2px; }
-.ptitle { font-size: 14px; line-height: 18px; font-weight: 500; color: #222; padding: 0 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.pmeta { display: flex; justify-content: space-between; gap: 8px; padding: 0 4px; font-size: 12px; color: #666; line-height: 16px; }
+/* product listing: Fresh <product-item> boxes have a fixed width (185px, 164px below 576px) */
+.grid-shop { display: grid; grid-template-columns: repeat(auto-fill, 185px); gap: 24px 16px; justify-content: space-between; }
 
 /* lists page */
 .list-card { background: var(--panel); padding: 20px; margin-bottom: 16px; display: grid; gap: 12px; }
@@ -127,7 +106,7 @@
   .sub-right { margin-left: 0; gap: 8px; }
   .cart-tot, .cart-sum .checkout { display: none; }
   .page.wide { margin-top: 12px; }
-  .grid-shop { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+  .grid-shop { grid-template-columns: repeat(auto-fill, 164px); gap: 20px 12px; }
   .ftr-cols { grid-template-columns: 1fr 1fr; }
   .cart-prev { width: auto; }
   .mob-cart { display: flex; }

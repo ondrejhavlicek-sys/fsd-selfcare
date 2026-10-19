@@ -16,9 +16,10 @@ window.Fresh = (function () {
     })();
   });
   /* Mount a component into a (possibly detached) element. Returns the Vue app. */
-  function mount(component, el) {
+  function mount(component, el, register) {
     const app = createApp(component);
     KosikUI.install(app);
+    if (register) register(app);
     app.mount(el);
     return app;
   }
