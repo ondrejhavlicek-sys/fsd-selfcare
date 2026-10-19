@@ -151,10 +151,11 @@
         ${r.hub ? hub() : `<a class="back" href="#/ucet"><i aria-hidden="true">←</i>Firemní účet</a>` + body(cur)}</main></div></div>`;
       title = r.hub ? 'Firemní účet' : App.pages[cur].label;
     }
-    Nav.detach();
+    Nav.detach(); Grid.detach();
     Nav.sync(r);
     app.innerHTML = header() + subheader(r) + page + footer() + mobCart(r) + scenarioBox();
     Nav.attach(app.querySelector('#nav-slot'));
+    Grid.attach(app.querySelector('#grid-slot'));
     I18N.apply(app);
     document.title = I18N.t(title) + ' – makro distribuce';
   }

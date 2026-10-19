@@ -37,3 +37,13 @@ html[data-type="makro"] .makro-nav-item span { font-weight: 700; }
 
 /* Dropdown entries (Potraviny, Nepotravinové zboží, language): same light-blue hover as the nav items */
 [role="menuitem"][data-highlighted], [role="menuitem"]:hover { background: #eaf2fd !important; }
+
+/* Product box (vendor/product-item.js): Fresh hard-codes purple accents and a #E01F56 sale tag.
+   makro: blue accents, #990052 price tag (Figma 151:6722), font follows the Typography switch. */
+article[data-tid="product-box"], article[data-tid="product-box"] * { font-family: var(--font); }
+article[data-tid="product-box"] .tw-bg-ds-primary { background-color: var(--blue); }
+article[data-tid="product-box"] .hover-active\:tw-bg-ds-primary-off-mid:hover { background-color: var(--blue-hover); }
+article[data-tid="product-box"] .tw-bg-ds-primary-off-light { background-color: var(--soft); }
+article[data-tid="product-box"] .tw-text-ds-primary { color: var(--navy); }
+article[data-tid="product-box"] [class*="E01F56"] { background-color: #990052; color: #fff; }
+article[data-tid="product-box"] .a-tag { color: var(--blue); }

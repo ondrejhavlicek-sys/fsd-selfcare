@@ -3,46 +3,23 @@
   const { esc, icon, dialog, toast, field, emptyState } = UI;
   const SH = 'assets/icons/shop/';
   const PROD = id => ShopData.products.find(p => p.id === id);
-  const plus = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 4.200a1.371 1.371 0 0 1 1.371 1.371v5.058h5.058a1.370 1.370 0 1 1 0 2.742H13.370v5.058a1.370 1.370 0 1 1-2.742 0V13.370H5.570a1.371 1.371 0 1 1 0-2.742h5.058V5.570A1.371 1.371 0 0 1 12 4.201Z"/></svg>';
-  const split = n => { const c = Math.round(n * 100); return [Math.floor(c / 100), String(c % 100).padStart(2, '0')]; };
-  const priceHtml = p => {
-    const [i, d] = split(p.price);
-    if (p.kind === 'multi') return `<div class="price-row"><span class="pr tag"><b>${i}</b><sup>${d}</sup></span><span class="mk">od ${p.multiFrom} ks</span></div><div class="psingle">${esc(p.single)}</div>`;
-    if (p.kind === 'sale') return `<div class="price-row"><span class="pr tag"><b>${i}</b><sup>${d}</sup></span><span class="old">${App.fmt(p.old)}</span></div>`;
-    return `<div class="price-row"><span class="pr"><b>${i}</b><sup>${d}</sup></span></div>`;
-  };
-
   /* ---------- cart ---------- */
   App.cart = {
     qty: id => App.S.cart[id] || 0,
     set(id, n) { if (n <= 0) delete App.S.cart[id]; else App.S.cart[id] = Math.min(n, 99); },
     count: () => Object.values(App.S.cart).reduce((a, b) => a + b, 0),
+    /* Multikup: the mock's `price` is the multi-buy price, valid from `multiFrom` pcs; below that the single price applies */
+    unit: (p, q) => p.kind === 'multi' && q < p.multiFrom ? parseFloat(String(p.single).replace(',', '.')) : p.price,
     totals() {
-      const net = Object.keys(App.S.cart).reduce((s, id) => s + PROD(+id).price * App.S.cart[id], 0);
+      const net = Object.keys(App.S.cart).reduce((s, id) => s + App.cart.unit(PROD(+id), App.S.cart[id]) * App.S.cart[id], 0);
       return { net, gross: net * (1 + ShopData.vat) };
     },
     items() {
-      return Object.keys(App.S.cart).map(id => { const p = PROD(+id); return { id: +id, name: p.name, img: p.img, qty: App.S.cart[id], price: p.price * App.S.cart[id] }; });
+      return Object.keys(App.S.cart).map(id => { const p = PROD(+id); return { id: +id, name: p.name, img: p.img, qty: App.S.cart[id], price: App.cart.unit(p, App.S.cart[id]) * App.S.cart[id] }; });
     }
   };
-  const cartAct = fn => el => { fn(+el.dataset.id); App.render(); };
-  App.on('c-inc', cartAct(id => App.cart.set(id, App.cart.qty(id) + 1)));
-  App.on('c-dec', cartAct(id => App.cart.set(id, App.cart.qty(id) - 1)));
-  App.on('p-add', el => {
-    if (!App.currentSite()) return toast('Nejdřív vyberte aktivní provozovnu.');
-    if (App.S.role === 'viewer') return toast('S rolí Prohlížející nemůžete nakupovat.');
-    App.cart.set(+el.dataset.id, App.cart.qty(+el.dataset.id) + 1); App.render();
-  });
 
   /* ---------- listing ---------- */
-  const card = p => {
-    const q = App.cart.qty(p.id);
-    return `<article class="pcard"><div class="pimg"><img class="ph" src="assets/products/${p.img}.png" alt="" loading="lazy">
-      <div class="pcta">${q ? `<div class="stepper"><button data-act="c-dec" data-id="${p.id}" aria-label="Ubrat">−</button><span>${q}</span><button data-act="c-inc" data-id="${p.id}" aria-label="Přidat">+</button></div>`
-        : `<button class="add" data-act="p-add" data-id="${p.id}" aria-label="Přidat do košíku: ${esc(p.name)}">${plus}</button>`}</div></div>
-      <div class="pdata">${priceHtml(p)}<div class="ptitle" title="${esc(p.name)}">${esc(p.name)}</div><div class="pmeta"><span>${esc(p.pack)}</span><span>${esc(p.unit)}</span></div></div></article>`;
-  };
-
   const SORTS = { rec: 'Doporučené', asc: 'Cena vzestupně', desc: 'Cena sestupně', name: 'Název' };
   const F = { akce: false, multi: false, today: true, sort: 'rec' };
   const countText = n => `${n} ${n === 1 ? 'produkt' : n >= 2 && n <= 4 ? 'produkty' : 'produktů'}`;
@@ -66,7 +43,7 @@
       let grid;
       if (App.S.scenario === 'loading') grid = UI.loadingBox();
       else if (App.S.scenario === 'error') grid = UI.alertBox('err', 'Stránku se nepodařilo načíst', 'Zkuste to prosím znovu. Pokud potíže přetrvají, zavolejte nám na +420 271 005 005.', '<br><button class="tbtn" data-act="retry">Zkusit znovu</button>');
-      else if (list.length) grid = `<div class="grid-shop">${list.map(card).join('')}</div>`;
+      else if (list.length) { Grid.sync(list); grid = '<div id="grid-slot"></div>'; }
       else if (query) grid = emptyState('Pro hledaný výraz jsme nic nenašli', 'Zkontrolujte překlepy nebo zkuste jiné slovo.', '<button class="btn soft" data-act="clear-search">Zrušit hledání</button>');
       else grid = emptyState('Nic jsme nenašli', 'Zkuste zrušit některý z filtrů.', '<button class="btn soft" data-act="f-reset">Zrušit filtry</button>');
       const head = query
