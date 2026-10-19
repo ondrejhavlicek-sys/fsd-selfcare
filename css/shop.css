@@ -138,3 +138,28 @@ html[data-type="makro"] .nav-btn { font-size: 16px; }
 .mob-cart small { font-size: 11px; color: #666; }
 
 @media (max-width: 768px) { .mob-cart { display: flex; } .page.wide { margin-bottom: 120px; } .scn { bottom: 76px; } }
+
+/* search (Figma: 500px field, grey-blue border, blue 40px button) */
+.hdr-search, .m-search { position: relative; display: flex; align-items: stretch; height: 40px; }
+.hdr-search { flex: 1 1 260px; max-width: 500px; margin: 0 24px; }
+.hdr-search input, .m-search input { flex: 1; min-width: 0; height: 40px; border: 1px solid #9aacc6; border-right: 0; border-radius: 8px 0 0 8px; padding: 0 44px 0 16px; font: inherit; font-size: 14px; color: #222; background: #fff; }
+.hdr-search input::placeholder, .m-search input::placeholder { color: #929292; }
+.hdr-search input:focus-visible, .m-search input:focus-visible { outline: 2px solid var(--yellow); outline-offset: 0; }
+.hdr-search .mic, .m-search .mic { position: absolute; right: 48px; top: 0; width: 36px; height: 40px; border: 0; background: none; display: grid; place-items: center; padding: 0; }
+.hdr-search .mic img, .m-search .mic img { width: 20px; height: 20px; }
+.hdr-search .go, .m-search .go { width: 40px; height: 40px; flex: none; border: 0; border-radius: 0 8px 8px 0; background: #005ae0; display: grid; place-items: center; padding: 0; }
+.hdr-search .go:hover, .m-search .go:hover { background: var(--blue-hover); }
+.hdr-search .go img, .m-search .go img { width: 24px; height: 24px; }
+.m-search { display: none; }
+.search-term { margin: -8px 0 16px; color: #222; }
+@media (max-width: 1180px) { .hdr-addr small { display: none; } .hdr-search { margin: 0 12px; } }
+@media (max-width: 768px) {
+  .hdr-search { display: none; }
+  .m-search { display: flex; background: var(--navy); padding: 0 12px 12px; height: 52px; }
+  .m-search input { height: 40px; }
+  .m-search .mic { right: 52px; top: 0; }
+  .m-search .go { height: 40px; }
+}
+
+.hdr-search input, .m-search input { text-overflow: ellipsis; }
+.hdr-search input::placeholder, .m-search input::placeholder { text-overflow: ellipsis; }

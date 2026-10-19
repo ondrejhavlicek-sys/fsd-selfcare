@@ -60,22 +60,25 @@
       ${GROUPS.flatMap(g => g.pages).map(id => `<a class="item" role="menuitem" href="#/ucet/${id}">${esc(App.pages[id].label)}</a>`).join('')}
       <hr><a class="item" href="#" data-act="logout">Odhlásit se</a></div>` : '';
     const addrLabel = site ? site.address : 'Žádná provozovna';
+    const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
       <div class="hdr-left">
-        <a class="brand" href="#/"><span class="logo">makro</span><span>distribuce</span></a>
+        <a class="brand" href="#/" data-act="clear-search"><span class="logo">makro</span><span>distribuce</span></a>
         <div class="pop-host"><button class="hdr-addr" data-act="addr" aria-haspopup="true" aria-expanded="${S.pop === 'addr'}"><span><small>Vybraná dodací adresa</small><b>${esc(addrLabel)}</b></span>${img('chevron-right')}</button>${addrPop}</div>
       </div>
+      ${sf('hdr-search')}
       <div class="hdr-actions">
         <button class="circ" data-act="bell" aria-label="Oznámení">${img('bell')}</button>
         <div class="pop-host"><button class="co-btn" data-act="acct" aria-haspopup="true" aria-expanded="${S.pop === 'acct'}" aria-label="Firemní účet: ${esc(c.name)}">${icon('company', 'ico-building')}<span>${esc(c.name)}</span>${img('chevron-down', 'chev')}</button>${acctPop}</div>
       </div></header>
+      ${sf('m-search')}
       <button class="deliv-bar" data-act="addr"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
   }
 
   function subheader(r) {
     const S = App.S, n = App.cart.count(), t = App.cart.totals();
     const cur = r.shop === 'home' ? 'home' : r.shop === 'lists' ? 'lists' : r.id === 'orders' ? 'orders' : '';
-    const a = (k, href, label, extra) => `<a class="nav-btn" href="${href}" ${cur === k ? 'aria-current="page"' : ''}>${extra || ''}${esc(label)}${k === 'home' ? img('chevron-down') : ''}</a>`;
+    const a = (k, href, label, extra) => `<a class="nav-btn" href="${href}" ${k === 'home' ? 'data-act="clear-search"' : ''} ${cur === k ? 'aria-current="page"' : ''}>${extra || ''}${esc(label)}${k === 'home' ? img('chevron-down') : ''}</a>`;
     const langPop = S.pop === 'lang' ? `<div class="pop" role="menu" style="width:200px">${Object.keys(LANGS).map(k => `<a class="item ${S.lang === k ? 'on' : ''}" href="#" role="menuitem" data-act="setlang" data-lang="${k}">${LANGS[k]}</a>`).join('')}</div>` : '';
     return `<div class="subhdr"><div class="subhdr-in">
       ${a('home', '#/', 'Potraviny')}
@@ -184,6 +187,8 @@
       lang() { togglePop('lang'); },
       cart() { togglePop('cart'); },
       bell() { UI.toast('Nemáte žádná nová oznámení.'); },
+      mic() { UI.toast('Hlasové vyhledávání není součástí prototypu.'); },
+      'clear-search'() { App.S.query = ''; if (location.hash === '#/' || location.hash === '') render(); else location.hash = '#/'; },
       soon(ev) { e.preventDefault(); UI.toast('Tato část není součástí prototypu.'); },
       checkout() { UI.toast(App.cart.count() ? 'Pokladna není součástí prototypu.' : 'Košík je prázdný.'); },
       'pick-site'() { e.preventDefault(); App.S.siteId = el.dataset.id; App.S.pop = false; render(); UI.toast('Dodací adresa je změněná.'); },
@@ -195,6 +200,12 @@
       reset() { const keep = { role: App.S.role, scenario: App.S.scenario, type: App.S.type, scn: App.S.scn, lang: App.S.lang }; App.reset(); Object.assign(App.S, keep); render(); UI.toast('Ukázková data jsou obnovena.'); }
     };
     if (core[act]) core[act](); else if (App.handlers[act]) App.handlers[act](el, e);
+  });
+  document.addEventListener('submit', e => {
+    const f = e.target.closest('[data-search]'); if (!f) return;
+    e.preventDefault();
+    App.S.query = f.q.value.trim(); App.S.pop = false;
+    if (location.hash === '#/' || location.hash === '') render(); else location.hash = '#/';
   });
   document.addEventListener('change', e => {
     const s = e.target.closest('[data-sel]'); if (!s) return;

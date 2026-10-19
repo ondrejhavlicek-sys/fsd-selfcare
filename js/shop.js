@@ -55,11 +55,15 @@
   const F = { akce: false, multi: false, today: true, sort: 'rec' };
   const countText = n => `${n} ${n === 1 ? 'produkt' : n >= 2 && n <= 4 ? 'produkty' : 'produktů'}`;
 
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   App.registerShop('home', {
-    label: 'Ovoce',
-    crumbs: () => ShopData.breadcrumb.map((l, i) => ({ label: l, href: i ? '#/' : '#/' })),
+    get label() { return App.S.query ? 'Výsledky hledání' : 'Ovoce'; },
+    crumbs: () => App.S.query ? [{ label: 'Hlavní stránka', href: '#/' }, { label: 'Výsledky hledání', href: '#/' }]
+      : ShopData.breadcrumb.map((l, i) => ({ label: l, href: '#/' })),
     render() {
+      const query = App.S.query || '';
       let list = ShopData.products.slice();
+      if (query) { const words = norm(query).split(/\s+/).filter(Boolean); list = list.filter(p => words.every(w => norm(p.name).includes(w))); }
       if (F.akce) list = list.filter(p => p.kind === 'sale');
       if (F.multi) list = list.filter(p => p.kind === 'multi');
       if (F.sort === 'asc') list.sort((a, b) => a.price - b.price);
@@ -70,9 +74,14 @@
       let grid;
       if (App.S.scenario === 'loading') grid = UI.loadingBox();
       else if (App.S.scenario === 'error') grid = UI.alertBox('err', 'Stránku se nepodařilo načíst', 'Zkuste to prosím znovu. Pokud potíže přetrvají, zavolejte nám na +420 271 005 005.', '<br><button class="tbtn" data-act="retry">Zkusit znovu</button>');
-      else grid = list.length ? `<div class="grid-shop">${list.map(card).join('')}</div>` : emptyState('Nic jsme nenašli', 'Zkuste zrušit některý z filtrů.', '<button class="btn soft" data-act="f-reset">Zrušit filtry</button>');
-      return `<h1 class="shop-title">Ovoce</h1>
-        <div class="tiles-row">${ShopData.tiles.map(t => `<button class="tile-sub" data-act="soon"><img src="assets/tiles/${t.img}.png" alt=""><span>${esc(t.name)}</span></button>`).join('')}</div>
+      else if (list.length) grid = `<div class="grid-shop">${list.map(card).join('')}</div>`;
+      else if (query) grid = emptyState('Pro hledaný výraz jsme nic nenašli', 'Zkontrolujte překlepy nebo zkuste jiné slovo.', '<button class="btn soft" data-act="clear-search">Zrušit hledání</button>');
+      else grid = emptyState('Nic jsme nenašli', 'Zkuste zrušit některý z filtrů.', '<button class="btn soft" data-act="f-reset">Zrušit filtry</button>');
+      const head = query
+        ? `<h1 class="shop-title">Výsledky hledání</h1><p class="search-term">Hledaný výraz: <b>${esc(query)}</b> · <button class="tbtn" data-act="clear-search">Zrušit hledání</button></p>`
+        : `<h1 class="shop-title">Ovoce</h1>
+        <div class="tiles-row">${ShopData.tiles.map(t => `<button class="tile-sub" data-act="soon"><img src="assets/tiles/${t.img}.png" alt=""><span>${esc(t.name)}</span></button>`).join('')}</div>`;
+      return `${head}
         <div class="toolbar"><div class="chips-bar">
           <button class="fchip main" data-act="soon"><img src="${SH}filter.svg" alt="">Filtry</button>
           ${chip('', F.today, 'f-today', 'calendar', 'Dostupné dnes')}${chip('', F.akce, 'f-akce', 'discount', 'Akce')}${chip('', F.multi, 'f-multi', 'multikup', 'Multikup')}</div>
