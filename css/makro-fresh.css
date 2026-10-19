@@ -1,0 +1,39 @@
+/* makro restyle of the Fresh design system, part 2: CSS layer on top of vendor/kosik-ui-base.css.
+   Fresh is themed through CSS variables (ds-context-*), so makro blue replaces the Kosik purple here
+   without forking any component. Radius is zeroed in js/makro-theme.js; arbitrary radii below. */
+:root {
+  --ds-context-primary: var(--blue);
+  --ds-context-off-mid: var(--blue-hover);
+  --ds-context-mid: #9dbdf0;
+  --ds-context-tertiary: var(--soft);
+  --ds-context-off-light: var(--soft-hover);
+  --ds-icon-fill-primary: var(--navy);
+  --ds-icon-fill-secondary: #9dbdf0;
+}
+
+/* Main nav: the primary (highlight) item uses makro blue; Fresh hard-codes the Kosik purple for it. */
+.makro-nav-item.is-highlight { background: var(--ds-context-primary); color: #fff; transition: background-color .15s; }
+.makro-nav-item.is-highlight:hover, .makro-nav-item.is-highlight[aria-expanded="true"] { background: var(--ds-context-off-mid); }
+.makro-nav-item.is-highlight .chev { color: #fff; }
+/* Main nav: current page / open menu use makro light blue, hover a lighter tint (Fresh uses grey level-3) */
+.makro-nav-item.makro-nav-item[data-route-active], .makro-nav-item.makro-nav-item[aria-expanded="true"] { background: var(--soft); }
+.makro-nav-item.makro-nav-item:hover { background: #eaf2fd; }
+.makro-nav-item.makro-nav-item[data-route-active]:hover, .makro-nav-item.makro-nav-item[aria-expanded="true"]:hover { background: var(--soft-hover); }
+.makro-nav-item .chev { transition: transform .15s; }
+.makro-nav-item[aria-expanded="true"] .chev { transform: scaleY(-1); }
+@media (prefers-reduced-motion: reduce) { .makro-nav-item, .makro-nav-item .chev { transition: none; } }
+
+/* Arbitrary radii that Fresh components hard-code (tw-rounded-[14px] etc.) cannot be reached from the Tailwind theme.
+   Square them here; true circles (50%) are kept. */
+[class*="tw-rounded-["]:not([class*="tw-rounded-[50"]) { border-radius: 0 !important; }
+
+/* Typography: Fresh components follow the prototype's Typography switch (Inter by default, Lato in the makro.cz theme)
+   instead of Fresh's own text styles. Floating content is teleported to <body>, hence the twpf selectors. */
+#nav-host, #nav-host *, [class*="twpf"], [class*="tw-pf"], [class*="twpf"] * { font-family: var(--font); }
+.makro-nav-item, [role="menuitem"], [role="menuitem"] *, .cart-prev, .cart-prev * { font-size: var(--fs-base); }
+.cart-prev .cp-item .n, .cart-prev .cp-item .p, .cart-prev .row, .cart-prev .row * { font-size: 13px; }
+.makro-nav-item span { font-weight: 600; }
+html[data-type="makro"] .makro-nav-item span { font-weight: 700; }
+
+/* Dropdown entries (Potraviny, Nepotravinové zboží, language): same light-blue hover as the nav items */
+[role="menuitem"][data-highlighted], [role="menuitem"]:hover { background: #eaf2fd !important; }

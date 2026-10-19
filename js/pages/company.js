@@ -27,7 +27,7 @@
   const phoneOk = v => /^\+?[\d\s]{9,16}$/.test(v || '');
 
   App.on('co-refresh', el => {
-    el.disabled = true; el.textContent = 'Aktualizuji…';
+    el.disabled = true; el.textContent = I18N.t('Aktualizuji…');
     setTimeout(() => { App.render(); toast('Údaje jsou aktuální podle obchodního rejstříku.'); }, 900);
   });
 

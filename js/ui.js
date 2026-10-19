@@ -21,7 +21,8 @@ window.UI = (function () {
     lock: 'M6 11V8a6 6 0 1 1 12 0v3M5 11h14v10H5z',
     refresh: 'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5',
     cart: 'M3 4h2l2.5 11h11L21 7H6M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z',
-    menu: 'M4 7h16M4 12h16M4 17h16'
+    menu: 'M4 7h16M4 12h16M4 17h16',
+    globe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.500 2.700 3.800 5.700 3.800 9s-1.300 6.300-3.800 9c-2.500-2.700-3.800-5.700-3.800-9S9.500 5.700 12 3z'
   };
   const icon = (n, cls) => n === 'company'
     ? `<img class="${cls || ''}" src="assets/icons/building-outline.svg" width="24" height="24" alt="">`
@@ -37,7 +38,7 @@ window.UI = (function () {
   function toast(msg) {
     document.querySelectorAll('.toast').forEach(t => t.remove());
     const t = document.createElement('div');
-    t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg;
+    t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = window.I18N ? I18N.t(msg) : msg;
     document.body.appendChild(t);
     clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 3200);
   }
@@ -71,6 +72,7 @@ window.UI = (function () {
       <div class="dlg-body">${o.body || ''}</div>
       <div class="dlg-f">${o.submit === null ? '' : `<button class="btn ${o.danger ? 'danger' : ''}" type="submit">${esc(o.submit || 'Uložit')}</button>`}<button type="button" class="link" data-close>${esc(o.cancel || 'Zrušit')}</button></div></form>`;
     document.body.appendChild(ov);
+    if (window.I18N) I18N.apply(ov);
     document.addEventListener('keydown', onKey);
     const form = ov.querySelector('form');
     ov.addEventListener('mousedown', e => { if (e.target === ov) closeDialog(); });
@@ -88,7 +90,7 @@ window.UI = (function () {
       form.querySelectorAll('input[type=checkbox]').forEach(c => { if (!c.name) return; if (!(c.name in data)) data[c.name] = []; else if (!Array.isArray(data[c.name])) data[c.name] = [data[c.name]]; });
       const err = o.onSubmit ? o.onSubmit(data, form) : null;
       if (err) {
-        if (typeof err === 'object') { const f = form.querySelector(`[data-f="${err.field}"]`); if (f) { f.classList.add('bad'); const er = f.querySelector('.err'); er.textContent = err.msg; er.hidden = false; f.querySelector('input,select')?.focus(); } }
+        if (typeof err === 'object') { const f = form.querySelector(`[data-f="${err.field}"]`); if (f) { f.classList.add('bad'); const er = f.querySelector('.err'); er.textContent = window.I18N ? I18N.t(err.msg) : err.msg; er.hidden = false; f.querySelector('input,select')?.focus(); } }
         return;
       }
       closeDialog();
