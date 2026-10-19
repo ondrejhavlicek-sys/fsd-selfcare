@@ -9,6 +9,7 @@
   const LANGS = { cs: 'Čeština', en: 'English', vi: 'Tiếng Việt' };
 
   const App = window.App = {
+    LANGS,
     S: {}, pages: {}, shopPages: {}, handlers: {},
     reset() {
       const d = clone(MockData), keep = App.S;
@@ -75,25 +76,8 @@
       <button class="deliv-bar" data-act="addr"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
   }
 
-  function subheader(r) {
-    const S = App.S, n = App.cart.count(), t = App.cart.totals();
-    const cur = r.shop === 'home' ? 'home' : r.shop === 'lists' ? 'lists' : r.id === 'orders' ? 'orders' : '';
-    const a = (k, href, label, extra) => `<a class="nav-btn" href="${href}" ${k === 'home' ? 'data-act="clear-search"' : ''} ${cur === k ? 'aria-current="page"' : ''}>${extra || ''}${esc(label)}${k === 'home' ? img('chevron-down') : ''}</a>`;
-    const langPop = S.pop === 'lang' ? `<div class="pop" role="menu" style="width:200px">${Object.keys(LANGS).map(k => `<a class="item ${S.lang === k ? 'on' : ''}" href="#" role="menuitem" data-act="setlang" data-lang="${k}">${LANGS[k]}</a>`).join('')}</div>` : '';
-    return `<div class="subhdr"><div class="subhdr-in">
-      ${a('home', '#/', 'Potraviny')}
-      <button class="nav-btn nav-hide-md" data-act="soon">Nepotravinové zboží${img('chevron-down')}</button>
-      ${a('orders', '#/ucet/orders', 'Mé objednávky')}
-      ${a('lists', '#/seznamy', 'Seznamy', img('shopping-list', 'lg'))}
-      <div class="sub-right">
-        <div class="pop-host"><button class="lang" data-act="lang" aria-haspopup="true" aria-expanded="${S.pop === 'lang'}" aria-label="Jazyk">${icon('globe', 'g')}${LANGS[S.lang]}</button>${langPop}</div>
-        <div class="cart-sum pop-host">
-          <button class="cart-btn" data-act="cart" aria-haspopup="true" aria-expanded="${S.pop === 'cart'}" aria-label="Košík">${img('chevron-down', 'dd')}${img('cart')}<span class="cnt">${n}</span></button>
-          <div class="cart-tot"><b>${App.fmt(t.net)}</b><small>${App.fmt(t.gross)} včetně DPH</small></div>
-          <button class="btn checkout" data-act="checkout">K pokladně</button>
-          ${S.pop === 'cart' ? App.cart.popover() : ''}
-        </div></div></div></div>`;
-  }
+  /* the navigation bar is a Fresh Vue island (js/nav.js); the shell only leaves a slot for it */
+  const subheader = () => '<div id="nav-slot"></div>';
 
   const footer = () => `<footer class="ftr"><div class="ftr-cols">
     <div><h4>Pro vaše podnikání</h4>${['Můj obchod', 'Vzor plné moci ke stažení', 'Vše pro maloobchod', 'Vše pro gastronomii', 'Track & Trace', 'ProTrace', 'Kvalita a standardy', 'Compliance'].map(x => `<a href="#" data-act="soon">${esc(x)}</a>`).join('')}</div>
@@ -167,7 +151,10 @@
         ${r.hub ? hub() : `<a class="back" href="#/ucet"><i aria-hidden="true">←</i>Firemní účet</a>` + body(cur)}</main></div></div>`;
       title = r.hub ? 'Firemní účet' : App.pages[cur].label;
     }
+    Nav.detach();
+    Nav.sync(r);
     app.innerHTML = header() + subheader(r) + page + footer() + mobCart(r) + scenarioBox();
+    Nav.attach(app.querySelector('#nav-slot'));
     I18N.apply(app);
     document.title = I18N.t(title) + ' – makro distribuce';
   }
@@ -184,15 +171,13 @@
     const core = {
       acct() { if (mobile()) { App.S.pop = false; location.hash = '#/ucet'; } else togglePop('acct'); },
       addr() { togglePop('addr'); },
-      lang() { togglePop('lang'); },
-      cart() { togglePop('cart'); },
+      cart() { Nav.openCart(); },
       bell() { UI.toast('Nemáte žádná nová oznámení.'); },
       mic() { UI.toast('Hlasové vyhledávání není součástí prototypu.'); },
       'clear-search'() { App.S.query = ''; if (location.hash === '#/' || location.hash === '') render(); else location.hash = '#/'; },
       soon(ev) { e.preventDefault(); UI.toast('Tato část není součástí prototypu.'); },
       checkout() { UI.toast(App.cart.count() ? 'Pokladna není součástí prototypu.' : 'Košík je prázdný.'); },
       'pick-site'() { e.preventDefault(); App.S.siteId = el.dataset.id; App.S.pop = false; render(); UI.toast('Dodací adresa je změněná.'); },
-      setlang() { e.preventDefault(); App.S.lang = el.dataset.lang; I18N.set(App.S.lang); App.S.pop = false; render(); },
       personal() { UI.toast('Přepnutí na osobní účet není součástí prototypu.'); },
       logout() { e.preventDefault(); App.S.pop = false; render(); UI.toast('Odhlášení není součástí prototypu.'); },
       scn() { App.S.scn = !App.S.scn; render(); },

@@ -8,17 +8,25 @@
 <link rel="apple-touch-icon" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&display=swap">
+<link rel="stylesheet" href="vendor/kosik-ui-base.css">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/shop.css">
+<link rel="stylesheet" href="css/makro-fresh.css">
 </head>
 <body>
 <div id="app"></div>
+<script src="vendor/vue.global.js"></script>
+<script src="vendor/kosik-ui.js"></script>
+<script src="vendor/tailwind-play.js"></script>
+<script src="vendor/tailwind-setup.js"></script>
+<script src="js/makro-theme.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/data.js"></script>
 <script src="js/shop-data.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/fresh.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pages/company.js"></script>
 <script src="js/pages/orders.js"></script>
@@ -26,6 +34,7 @@
 <script src="js/pages/users.js"></script>
 <script src="js/pages/sites.js"></script>
 <script src="js/shop.js"></script>
-<script>App.boot();</script>
+<script src="js/nav.js"></script>
+<script>Fresh.ready.then(App.boot);</script>
 </body>
 </html>

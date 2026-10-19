@@ -21,21 +21,13 @@
       const net = Object.keys(App.S.cart).reduce((s, id) => s + PROD(+id).price * App.S.cart[id], 0);
       return { net, gross: net * (1 + ShopData.vat) };
     },
-    popover() {
-      const ids = Object.keys(App.S.cart), t = App.cart.totals(), site = App.currentSite();
-      return `<div class="pop cart-pop" role="dialog" aria-label="Košík"><div class="cp-head">Košík${site ? ' · ' + esc(site.name) : ''}</div>
-        ${ids.length ? `<div class="cp-list">${ids.map(id => { const p = PROD(+id); return `<div class="cp-item"><img src="assets/products/${p.img}.png" alt="">
-          <div><div class="n">${esc(p.name)}</div><div class="p">${App.fmt(p.price * App.S.cart[id])}</div></div>
-          <div class="stepper"><button data-act="c-dec" data-id="${id}" aria-label="Ubrat">−</button><span>${App.S.cart[id]}</span><button data-act="c-inc" data-id="${id}" aria-label="Přidat">+</button></div></div>`; }).join('')}</div>
-          <div class="cp-foot"><div class="row"><span>Celkem bez DPH</span><b>${App.fmt(t.net)}</b></div><div class="row"><span>Celkem včetně DPH</span><span>${App.fmt(t.gross)}</span></div>
-          <button class="btn" data-act="checkout">K pokladně</button><button class="tbtn danger" data-act="c-clear" style="text-align:center">Vyprázdnit košík</button></div>`
-          : '<div class="cp-empty">Košík je prázdný.</div>'}</div>`;
+    items() {
+      return Object.keys(App.S.cart).map(id => { const p = PROD(+id); return { id: +id, name: p.name, img: p.img, qty: App.S.cart[id], price: p.price * App.S.cart[id] }; });
     }
   };
   const cartAct = fn => el => { fn(+el.dataset.id); App.render(); };
   App.on('c-inc', cartAct(id => App.cart.set(id, App.cart.qty(id) + 1)));
   App.on('c-dec', cartAct(id => App.cart.set(id, App.cart.qty(id) - 1)));
-  App.on('c-clear', () => { App.S.cart = {}; App.S.pop = false; App.render(); toast('Košík je vyprázdněný.'); });
   App.on('p-add', el => {
     if (!App.currentSite()) return toast('Nejdřív vyberte aktivní provozovnu.');
     if (App.S.role === 'viewer') return toast('S rolí Prohlížející nemůžete nakupovat.');

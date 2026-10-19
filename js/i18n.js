@@ -7,6 +7,12 @@ window.I18N = (function () {
   /* [cs, en, vi] */
   [
     /* shell */
+    /* main navigation */
+    ['Hlavní navigace', 'Main navigation', 'Điều hướng chính'], ['Zelenina', 'Vegetables', 'Rau củ'], ['Maso a ryby', 'Meat and fish', 'Thịt và cá'],
+    ['Mléčné výrobky a vejce', 'Dairy and eggs', 'Sữa và trứng'], ['Pečivo', 'Bakery', 'Bánh mì và bánh ngọt'], ['Nápoje', 'Drinks', 'Đồ uống'],
+    ['Trvanlivé potraviny', 'Long-life food', 'Thực phẩm bảo quản lâu'], ['Úklid a hygiena', 'Cleaning and hygiene', 'Vệ sinh và tẩy rửa'],
+    ['Obaly a jednorázové nádobí', 'Packaging and disposable tableware', 'Bao bì và đồ dùng một lần'], ['Kuchyňské vybavení', 'Kitchen equipment', 'Thiết bị nhà bếp'],
+    ['Kancelář a papír', 'Office and paper', 'Văn phòng và giấy'],
     ['Nakupování', 'Shopping', 'Mua sắm'], ['Firemní profil', 'Company profile', 'Hồ sơ công ty'],
     ['Správce', 'Administrator', 'Quản trị viên'], ['Nákupčí', 'Buyer', 'Người mua hàng'], ['Prohlížející', 'Viewer', 'Người xem'],
     ['Žádná provozovna', 'No site', 'Chưa có cơ sở'], ['Oznámení', 'Notifications', 'Thông báo'],
