@@ -128,3 +128,11 @@ window.MockData.addressSuggestions = [
   'Masarykova 28, 602 00 Brno', 'Masarykova 5, 602 00 Brno', 'Americká 42, 301 00 Plzeň',
   'Náměstí Republiky 1, 306 32 Plzeň', 'Zlatnická 10, 110 00 Praha 1'
 ];
+/* per-user settings (docs/DATA-MODEL-DRAFT.md section 3): display toggles, SSO identities, e-mail verification, password */
+window.MockData.users.forEach(u => Object.assign(u, {
+  display: { vat: 'excl', pack: 'piece', unit: 'kg' },
+  sso: { google: false, microsoft: false },
+  emailVerified: u.status !== 'invited',
+  passwordChanged: u.status === 'invited' ? '' : '1. 9. 2026'
+}));
+window.MockData.users.find(u => u.id === 'u1').sso.google = true;

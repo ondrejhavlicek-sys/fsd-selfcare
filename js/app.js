@@ -33,12 +33,9 @@
     render
   };
 
-  const GROUPS = [
-    { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'favorites'] },
-    { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
-    { label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] }
-  ];
   const ROLE_NAMES = { owner: 'Vlastník', admin: 'Správce účtu', buyer: 'Nákupčí', viewer: 'Prohlížející' };
+  /* renamed or merged pages keep working: old hash -> new page */
+  const REDIRECTS = { newsletter: 'privacy' };
 
   function route() {
     const h = location.hash;
@@ -47,7 +44,9 @@
     if (!m) return { shop: 'home' };
     const id = m[1];
     if (!id) return mobile() ? { hub: true } : { id: 'company' };
-    return { id: App.pages[id] ? id : 'company' };
+    const rid = REDIRECTS[id] || id;
+    if (REDIRECTS[id]) history.replaceState(null, '', '#/ucet/' + rid);
+    return { id: App.pages[rid] ? rid : 'company' };
   }
 
   /* ---------- shared shell ---------- */
@@ -56,10 +55,6 @@
     const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Košík a ceny se vztahují k vybrané provozovně.</div>
       ${S.sites.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(s.name)}<br><span class="muted">${esc(s.address)}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní provozovnu.</span>'}
       <hr><a class="item" href="#/ucet/sites">Spravovat provozovny</a></div>` : '';
-    const acctPop = S.pop === 'acct' ? `<div class="pop" role="menu"><div class="co">${esc(c.name)}</div><div class="ico">IČO: ${esc(c.ico)} · ${ROLE_NAMES[S.role]}</div>
-      <button class="btn soft sm" style="width:100%" data-act="personal">Přepnout na osobní účet</button><hr>
-      ${GROUPS.flatMap(g => g.pages).map(id => `<a class="item" role="menuitem" href="#/ucet/${id}">${esc(App.pages[id].label)}</a>`).join('')}
-      <hr><a class="item" href="#" data-act="logout">Odhlásit se</a></div>` : '';
     const addrLabel = site ? site.address : 'Žádná provozovna';
     const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
@@ -70,7 +65,7 @@
       ${sf('hdr-search')}
       <div class="hdr-actions">
         <button class="circ" data-act="bell" aria-label="Oznámení">${img('bell')}</button>
-        <div class="pop-host"><button class="co-btn" data-act="acct" aria-haspopup="true" aria-expanded="${S.pop === 'acct'}" aria-label="Firemní účet: ${esc(c.name)}">${icon('company', 'ico-building')}<span>${esc(c.name)}</span>${img('chevron-down', 'chev')}</button>${acctPop}</div>
+        <div id="acct-menu-slot"></div>
       </div></header>
       ${sf('m-search')}
       <button class="deliv-bar" data-act="addr"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
@@ -125,12 +120,13 @@
       page = `<div class="page acct-page"><div id="acct-slot"></div></div>`;
       title = r.hub ? 'Firemní účet' : App.pages[r.id].label;
     }
-    Nav.detach(); Grid.detach(); Acct.detach(); Acct.sync(r);
+    Nav.detach(); Grid.detach(); Acct.detach(); AcctMenu.detach(); Acct.sync(r); AcctMenu.sync();
     Nav.sync(r);
     app.innerHTML = header() + subheader(r) + page + footer() + mobCart(r) + scenarioBox();
     Nav.attach(app.querySelector('#nav-slot'));
     Grid.attach(app.querySelector('#grid-slot'));
     Acct.attach(app.querySelector('#acct-slot'));
+    AcctMenu.attach(app.querySelector('#acct-menu-slot'));
     I18N.apply(app);
     document.title = I18N.t(title) + ' – makro distribuce';
   }

@@ -12,9 +12,9 @@
 
   /* sidebar groups (kosik.cz profile structure; Provozovny and Role are our additions in "Firemní profil") */
   const GROUPS = [
-    { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'lists', 'favorites'] },
-    { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
-    { label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] }
+    { key: 'company', label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] },
+    { key: 'shop', label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'lists', 'favorites'] },
+    { key: 'user', label: 'Uživatelský účet', pages: ['personal', 'security', 'privacy', 'notifications'] }
   ];
   /* nav entries that are not account pages */
   const EXTRA = { lists: { label: 'Nákupní seznamy', icon: 'ShoppingListSolid', href: '#/seznamy' } };
@@ -127,33 +127,41 @@
       </div>`
   };
 
+  const initials = u => ((u.first || '').charAt(0) + (u.last || '').charAt(0)).toUpperCase() || (u.email || '?').charAt(0).toUpperCase();
+  const fullName = u => (u.first + ' ' + u.last).trim() || u.email;
+
+  /* administration menu: company block, shopping, user block (same order and labels as the header account menu) */
   const SideNav = {
     setup() {
       const c = computed(() => App.S.company);
+      const me = computed(() => App.me());
       const cur = computed(() => state.route.hub ? '' : state.route.id);
       const count = id => id === 'users' ? App.S.users.length : null;
       const href = id => (meta(id).href || '#/ucet/' + id);
       const lock = id => !!(App.pages[id] && isLocked(App.pages[id]));
-      const personal = () => UI.toast('Přepnutí na osobní účet není součástí prototypu.');
       const edit = () => { location.hash = '#/ucet/company'; };
-      return { t, c, cur, count, href, lock, meta, GROUPS, I, personal, edit, App, state };
+      return { t, c, me, cur, count, href, lock, meta, GROUPS, I, edit, App, state, initials, fullName, MockData };
     },
     template: `
       <aside class="side" :aria-label="t('Firemní účet')">
-        <div class="who-box">
-          <div class="who"><div><b>{{ c.name }}</b><span>{{ t('IČO') }}: {{ c.ico }}</span></div>
-            <ds-icon-button v-if="App.isAdmin()" variant="ghost" size="sm" :icon="I.EditSolid" :aria-label="t('Upravit firemní informace')" @click="edit"></ds-icon-button></div>
-          <ds-button variant="secondary" size="md" class="who-btn" @click="personal">{{ t('Přepnout na osobní účet') }}</ds-button>
-        </div>
-        <nav v-for="g in GROUPS" :key="g.label" class="nav-group" :aria-label="t(g.label)">
-          <h3>{{ t(g.label) }}</h3>
-          <a v-for="id in g.pages" :key="id" class="nav-a" :href="href(id)" :aria-current="cur === id ? 'page' : undefined">
-            <component :is="I[meta(id).icon]" class="nav-ico"></component>
-            <span class="nav-lbl">{{ t(meta(id).label) }}</span>
-            <span v-if="count(id) != null" class="nav-cnt">{{ count(id) }}</span>
-            <component v-if="lock(id)" :is="I.Padlock" class="nav-lock" :aria-label="t('Omezený přístup')"></component>
-          </a>
-        </nav>
+        <template v-for="g in GROUPS" :key="g.key">
+          <div v-if="g.key === 'company'" class="who-box">
+            <div class="who"><div><b>{{ c.name }}</b><span>{{ t('IČO') }}: {{ c.ico }} · {{ t(MockData.roles[App.S.role].label) }}</span></div>
+              <ds-icon-button v-if="App.isAdmin()" variant="ghost" size="sm" :icon="I.EditSolid" :aria-label="t('Upravit firemní informace')" @click="edit"></ds-icon-button></div>
+          </div>
+          <div v-if="g.key === 'user'" class="who-box user-box">
+            <div class="who"><span class="avatar" aria-hidden="true">{{ initials(me) }}</span><div><b>{{ fullName(me) }}</b><span>{{ me.email }}</span></div></div>
+          </div>
+          <nav class="nav-group" :aria-label="t(g.label)">
+            <h3>{{ t(g.label) }}</h3>
+            <a v-for="id in g.pages" :key="id" class="nav-a" :href="href(id)" :aria-current="cur === id ? 'page' : undefined">
+              <component :is="I[meta(id).icon]" class="nav-ico"></component>
+              <span class="nav-lbl">{{ t(meta(id).label) }}</span>
+              <span v-if="count(id) != null" class="nav-cnt">{{ count(id) }}</span>
+              <component v-if="lock(id)" :is="I.Padlock" class="nav-lock" :aria-label="t('Omezený přístup')"></component>
+            </a>
+          </nav>
+        </template>
       </aside>`
   };
 
@@ -224,7 +232,7 @@
   let mounted = false;
 
   window.Acct = {
-    state, t, PageHead, EmptyState, PageState, FormModal, Field, LaterTag, StaffCard,
+    state, t, isLocked, initials, fullName, PageHead, EmptyState, PageState, FormModal, Field, LaterTag, StaffCard,
     sync(r) { state.route = { id: r.id || 'company', hub: !!r.hub }; state.mobile = matchMedia('(max-width: 768px)').matches; },
     confirm(o) { state.dlg = o; },
     detach() { if (host.parentNode) host.remove(); },

@@ -143,3 +143,22 @@
 
 .hdr-search input, .m-search input { text-overflow: ellipsis; }
 .hdr-search input::placeholder, .m-search input::placeholder { text-overflow: ellipsis; }
+
+/* header account menu (Fresh Popover): makro.cz account menu structure, makro light blue highlights */
+.am { width: 320px; margin: -16px; max-width: calc(100vw - 32px); font-family: var(--font); font-size: var(--fs-base); color: var(--navy); }
+.am-title { padding: 10px 16px; font-weight: 700; color: var(--navy); }
+.am-co { display: flex; gap: 12px; align-items: center; padding: 12px 16px; background: var(--soft); color: var(--navy); text-decoration: none; }
+.am-co:hover { background: #eaf2fd; }
+.am-co span { display: grid; min-width: 0; }
+.am-co b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.am-co small { font-size: var(--fs-small); color: var(--ink); }
+.am-links { display: grid; padding: 8px 0; }
+.am-links a { padding: 7px 16px; color: var(--navy); text-decoration: none; }
+.am-links a:hover, .am-out:hover, .am-act:hover { background: #eaf2fd; }
+.am-act, .am-out { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; text-align: left; padding: 9px 16px; font: inherit; color: var(--navy); cursor: pointer; }
+.am-act { background: #efefef; font-weight: 700; border-top: 1px solid #fff; }
+.am-out { background: #fff; border-top: 1px solid var(--line); }
+.am .am-ico { width: 20px; height: 20px; flex: none; }
+.am-user { display: flex; align-items: center; gap: 12px; padding: 16px 16px 4px; }
+.am-user b { font-weight: 700; }
+.am a:focus-visible, .am button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }

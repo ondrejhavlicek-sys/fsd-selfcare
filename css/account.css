@@ -138,3 +138,8 @@ html body [data-cid="ds-product-tag"].later-tag.later-tag { background-color: va
 .sec-h.first { margin-top: 0; }
 .mb-btn { margin: 12px 0 0; }
 .acct .lbl-t, .acct-drawer .lbl-t, .acct-drawer legend, [role="dialog"] .lbl-t { font-size: var(--fs-lbl); font-weight: var(--strong); color: var(--ink-strong); display: block; }
+
+/* avatar + user block in the administration menu */
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 14px; font-weight: 600; flex: none; }
+.acct .user-box .who { align-items: center; justify-content: flex-start; gap: 12px; }
+.acct .user-box .who span:not(.avatar) { display: block; overflow-wrap: anywhere; }
