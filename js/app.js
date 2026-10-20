@@ -10,7 +10,7 @@
 
   const App = window.App = {
     LANGS,
-    S: {}, pages: {}, shopPages: {}, handlers: {},
+    S: Vue.reactive({}), pages: {}, shopPages: {}, handlers: {},
     reset() {
       const d = clone(MockData), keep = App.S;
       Object.assign(App.S, { company: d.company, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
@@ -30,7 +30,8 @@
   };
 
   const GROUPS = [
-    { label: 'Nakupování', pages: ['orders', 'credits'] },
+    { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'favorites'] },
+    { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
     { label: 'Firemní profil', pages: ['company', 'users', 'sites', 'roles', 'payments'] }
   ];
   const ROLE_NAMES = { admin: 'Správce', buyer: 'Nákupčí', viewer: 'Prohlížející' };
@@ -44,11 +45,6 @@
     if (!id) return mobile() ? { hub: true } : { id: 'company' };
     return { id: App.pages[id] ? id : 'company' };
   }
-
-  const navLink = (id, cur) => {
-    const p = App.pages[id]; const lock = p.admin && !App.isAdmin();
-    return `<a class="nav-a" href="#/ucet/${id}" ${cur === id ? 'aria-current="page"' : ''}>${icon(p.icon)}${esc(p.label)}${lock ? '<span class="lock">' + icon('lock') + '</span>' : ''}</a>`;
-  };
 
   /* ---------- shared shell ---------- */
   function header() {
@@ -96,30 +92,6 @@
     return `<div class="mob-cart"><div><b>${App.fmt(t.net)}</b><small>${App.fmt(t.gross)} včetně DPH</small></div><button class="btn" data-act="cart">Zobrazit košík (${App.cart.count()})</button></div>`;
   }
 
-  function sidebar(cur) {
-    const c = App.S.company;
-    return `<aside class="side" aria-label="Firemní účet"><div class="who-box"><div class="who"><b>${esc(c.name)}</b><span>IČ: ${esc(c.ico)}</span></div>
-      <button class="btn soft sm" data-act="personal">Přepnout na osobní účet</button></div>
-      ${GROUPS.map(g => `<div class="nav-group"><h3>${g.label}</h3>${g.pages.map(id => navLink(id, cur)).join('')}</div>`).join('')}</aside>`;
-  }
-
-  function hub() {
-    return `<nav class="menu-list" aria-label="Firemní účet"><h1>Firemní účet</h1>
-      <p class="muted" style="margin-top:4px">${esc(App.S.company.name)} · IČ ${esc(App.S.company.ico)}</p>
-      ${GROUPS.map(g => `<div class="hub-g">${g.label}</div>${g.pages.map(id => `<a class="hub-a" href="#/ucet/${id}">${icon(App.pages[id].icon)}${esc(App.pages[id].label)}</a>`).join('')}`).join('')}
-      <div style="margin-top:24px"><button class="btn soft" style="width:100%" data-act="personal">Přepnout na osobní účet</button></div></nav>`;
-  }
-
-  function body(id) {
-    const p = App.pages[id], S = App.S;
-    if (p.admin && !App.isAdmin())
-      return `<h1>${esc(p.label)}</h1><div style="margin-top:24px">${alertBox('warn', 'K této stránce nemáte oprávnění', 'Zobrazit ji může jen správce firmy. Požádejte správce o změnu role nebo o úpravu, kterou potřebujete.')}</div>`;
-    if (S.scenario === 'loading') return `<h1>${esc(p.label)}</h1><div style="margin-top:24px">${loadingBox()}</div>`;
-    if (S.scenario === 'error')
-      return `<h1>${esc(p.label)}</h1><div style="margin-top:24px">${alertBox('err', 'Stránku se nepodařilo načíst', 'Zkuste to prosím znovu. Pokud potíže přetrvají, zavolejte nám na +420 271 005 005.', '<br><button class="tbtn" data-act="retry">Zkusit znovu</button>')}</div>`;
-    return p.render();
-  }
-
   function scenarioBox() {
     const S = App.S;
     const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${l}</option>`;
@@ -135,6 +107,7 @@
   App.fmt = n => n.toLocaleString('cs-CZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, ' ') + ' Kč';
 
   function render() {
+    if (!App.S.company) return; /* not booted yet (Fresh still loading) */
     const r = route(), S = App.S;
     document.documentElement.dataset.type = S.type === 'makro' ? 'makro' : 'figma';
     document.documentElement.lang = S.lang;
@@ -145,17 +118,15 @@
       page = `<div class="page wide">${crumbsHtml(sp.crumbs())}<main id="main">${sp.render()}</main></div>`;
       title = sp.label;
     } else {
-      const cur = r.id;
-      const crumbs = r.hub ? '' : crumbsHtml([{ label: 'Hlavní stránka', href: '#/' }, { label: 'Firemní účet', href: '#/ucet/company' }, { label: App.pages[cur].label, href: '#/ucet/' + cur }]);
-      page = `<div class="page ${r.hub ? 'on-hub' : ''}">${crumbs}<div class="shell">${sidebar(cur)}<main class="content" id="main">
-        ${r.hub ? hub() : `<a class="back" href="#/ucet"><i aria-hidden="true">←</i>Firemní účet</a>` + body(cur)}</main></div></div>`;
-      title = r.hub ? 'Firemní účet' : App.pages[cur].label;
+      page = `<div class="page acct-page"><div id="acct-slot"></div></div>`;
+      title = r.hub ? 'Firemní účet' : App.pages[r.id].label;
     }
-    Nav.detach(); Grid.detach();
+    Nav.detach(); Grid.detach(); Acct.detach(); Acct.sync(r);
     Nav.sync(r);
     app.innerHTML = header() + subheader(r) + page + footer() + mobCart(r) + scenarioBox();
     Nav.attach(app.querySelector('#nav-slot'));
     Grid.attach(app.querySelector('#grid-slot'));
+    Acct.attach(app.querySelector('#acct-slot'));
     I18N.apply(app);
     document.title = I18N.t(title) + ' – makro distribuce';
   }

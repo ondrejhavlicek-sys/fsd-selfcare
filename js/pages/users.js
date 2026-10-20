@@ -1,8 +1,9 @@
-/* Uživatelé: list, add/invite, edit (role + sites), block/unblock, remove */
+/* Uživatelé: Fresh table, add/edit dialog with role radios, block/unblock, remove */
 (function () {
-  const { esc, icon, field, dialog, toast, confirmDialog, emptyState, alertBox } = UI;
+  const { reactive, computed } = Vue;
+  const I = KosikUI.icons, t = Acct.t, toast = UI.toast;
   const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || '');
-  const STATUS = { active: ['Aktivní', 'ok'], invited: ['Pozvánka odeslána', 'warn'], blocked: ['Zablokovaný', 'bad'] };
+  const STATUS = { active: ['Aktivní', 'green'], invited: ['Pozvánka odeslána', 'neutral'], blocked: ['Zablokovaný', 'red'] };
 
   const sitesText = u => {
     if (u.role === 'admin' || u.sites === 'all') return 'Všechny provozovny';
@@ -10,87 +11,116 @@
   };
 
   App.register('users', {
-    label: 'Uživatelé', icon: 'users', admin: true,
-    render() {
-      const list = App.list(App.S.users), c = App.S.company;
-      const banner = c.onlyCompanyEmail
-        ? alertBox('info', 'Kolegy půjde přidat jen s firemním e-mailem', 'Povolené domény: ' + c.domains.map(d => '@' + d).join(', ') + '. Změníte je ve Firemních informacích.', '<br><a href="#/ucet/company">Otevřít Firemní informace</a>')
-        : '';
-      return pageHead('Uživatelé', `<button class="btn" data-act="u-add">${icon('plus')}Přidat kolegu</button>`) + banner +
-        (list.length ? `<table class="tbl"><thead><tr><th>Kolega</th><th>Role</th><th>Provozovny</th><th>Stav</th><th></th></tr></thead><tbody>${list.map(u => {
-          const st = STATUS[u.status];
-          const nm = (u.first + ' ' + u.last).trim();
-          return `<tr><td data-label="Kolega"><span class="email">${esc(u.email)}</span>${nm ? `<br><span class="muted">${esc(nm)}</span>` : ''}</td>
-            <td data-label="Role"><span class="role">${esc(MockData.roles[u.role].label)}</span></td><td data-label="Provozovny">${esc(sitesText(u))}</td>
-            <td data-label="Stav"><span class="badge ${st[1]}">${st[0]}</span></td>
-            <td class="acts-td"><div class="acts"><button class="tbtn" data-act="u-edit" data-id="${u.id}">Upravit</button>
-            ${u.status === 'invited' ? `<button class="tbtn" data-act="u-resend" data-id="${u.id}">Odeslat znovu</button>` : `<button class="tbtn" data-act="u-block" data-id="${u.id}">${u.status === 'blocked' ? 'Odblokovat' : 'Zablokovat'}</button>`}
-            <button class="tbtn danger" data-act="u-del" data-id="${u.id}">Odebrat</button></div></td></tr>`;
-        }).join('')}</tbody></table>`
-          : emptyState('Zatím tu nemáte žádné kolegy', 'Přidejte kolegu a určete, co smí ve firemním účtu dělat.', `<button class="btn" data-act="u-add">${icon('plus')}Přidat kolegu</button>`));
+    label: 'Uživatelé', icon: 'Users', admin: true,
+    comp: {
+      setup() {
+        const list = computed(() => App.list(App.S.users));
+        const f = reactive({ open: false, id: null, email: '', first: '', last: '', role: 'buyer', scope: 'all', sites: [], err: {} });
+        const roles = MockData.roles;
+        const openForm = u => {
+          const all = !u || u.role === 'admin' || u.sites === 'all';
+          Object.assign(f, { open: true, id: u ? u.id : null, err: {}, email: u ? u.email : '', first: u ? u.first : '', last: u ? u.last : '',
+            role: u ? u.role : 'buyer', scope: all ? 'all' : 'some', sites: all ? [] : u.sites.slice() });
+        };
+        const collect = base => {
+          base.first = f.first.trim(); base.last = f.last.trim(); base.role = f.role;
+          base.sites = f.role === 'admin' || f.scope === 'all' ? 'all' : f.sites.slice();
+        };
+        const submit = () => {
+          f.err = {}; const c = App.S.company;
+          if (!f.id) {
+            const email = f.email.trim().toLowerCase();
+            if (!emailOk(email)) return f.err = { email: 'Zadejte e-mail ve tvaru jmeno@firma.cz.' };
+            if (App.S.users.some(u => u.email === email)) return f.err = { email: 'Tento kolega už ve firmě je.' };
+            if (c.onlyCompanyEmail && !c.domains.includes(email.split('@')[1])) return f.err = { email: 'Použijte firemní e-mail (' + c.domains.map(x => '@' + x).join(', ') + ').' };
+            const u = { id: 'u' + Date.now(), email, status: 'invited' }; collect(u); App.S.users.push(u);
+            f.open = false; toast('Pozvánka byla odeslána na ' + email + '.');
+          } else {
+            const u = App.S.users.find(x => x.id === f.id);
+            if (u.role === 'admin' && f.role !== 'admin' && App.S.users.filter(x => x.role === 'admin' && x.status !== 'blocked').length < 2)
+              return f.err = { role: 'Ve firmě musí zůstat alespoň jeden správce.' };
+            collect(u); f.open = false; toast('Změny jsou uložené.');
+          }
+        };
+        const toggleSite = (id, on) => { f.sites = on ? f.sites.concat(id) : f.sites.filter(x => x !== id); };
+        const resend = u => toast('Pozvánka byla odeslána znovu na ' + u.email + '.');
+        const block = u => {
+          if (u.status === 'blocked') { u.status = 'active'; return toast('Kolega je odblokovaný.'); }
+          Acct.confirm({ title: 'Zablokovat kolegu?', text: 'Kolega se nebude moct přihlásit ani nakupovat. Odblokovat ho můžete kdykoli.', label: 'Zablokovat', danger: true,
+            onYes: () => { u.status = 'blocked'; toast('Kolega je zablokovaný.'); } });
+        };
+        const del = u => {
+          if (u.role === 'admin' && App.S.users.filter(x => x.role === 'admin').length < 2)
+            return Acct.confirm({ title: 'Kolegu nelze odebrat', text: 'Ve firmě musí zůstat alespoň jeden správce. Nejdřív určete správcem jiného kolegu.', cancel: 'Rozumím' });
+          Acct.confirm({ title: 'Odebrat kolegu?', text: u.email + ' ztratí přístup do firemního účtu. Jeho objednávky zůstanou zachované.', label: 'Odebrat', danger: true,
+            onYes: () => { App.S.users = App.S.users.filter(x => x.id !== u.id); toast('Kolega je odebraný.'); } });
+        };
+        return { App, I, t, list, f, roles, STATUS, sitesText, openForm, submit, toggleSite, resend, block, del, MockData };
+      },
+      template: `
+        <page-state title="Uživatelé">
+          <template #action><ds-button @click="openForm(null)">{{ t('Přidat kolegu') }}</ds-button></template>
+          <template #default>
+            <ds-message v-if="App.S.company.onlyCompanyEmail" variant="info" class="mb" :title="t('Kolegy půjde přidat jen s firemním e-mailem')"
+              :body="t('Povolené domény:') + ' ' + App.S.company.domains.map(d => '@' + d).join(', ') + '. ' + t('Změníte je ve Firemních informacích.')">
+              <template #action><ds-button variant="secondary" size="sm" as="a" href="#/ucet/company">{{ t('Otevřít Firemní informace') }}</ds-button></template>
+            </ds-message>
+            <ds-table v-if="list.length" class="acct-tbl">
+              <thead><tr><th>{{ t('E-mail') }}</th><th>{{ t('Jméno') }}</th><th>{{ t('Příjmení') }}</th><th>{{ t('Role') }}</th><th>{{ t('Provozovny') }}</th><th>{{ t('Stav') }}</th><th><span class="sr">{{ t('Akce kolegy') }}</span></th></tr></thead>
+              <tbody>
+                <tr v-for="u in list" :key="u.id">
+                  <td :data-label="t('E-mail')"><span class="email">{{ u.email }}</span></td>
+                  <td :data-label="t('Jméno')">{{ u.first || '—' }}</td>
+                  <td :data-label="t('Příjmení')">{{ u.last || '—' }}</td>
+                  <td :data-label="t('Role')">{{ t(roles[u.role].label) }}</td>
+                  <td :data-label="t('Provozovny')">{{ t(sitesText(u)) }}</td>
+                  <td :data-label="t('Stav')"><product-tag :variant="STATUS[u.status][1]" :label="t(STATUS[u.status][0])"></product-tag></td>
+                  <td class="acts-td">
+                    <ds-dropdown-menu align="end">
+                      <template #trigger><ds-icon-button variant="ghost" size="sm" :icon="I.KebabMenuSolid" :aria-label="t('Akce kolegy') + ': ' + u.email"></ds-icon-button></template>
+                      <ds-dropdown-menu-item :label="t('Upravit')" @select="openForm(u)"></ds-dropdown-menu-item>
+                      <ds-dropdown-menu-item v-if="u.status === 'invited'" :label="t('Odeslat znovu')" @select="resend(u)"></ds-dropdown-menu-item>
+                      <ds-dropdown-menu-item v-else :label="u.status === 'blocked' ? t('Odblokovat') : t('Zablokovat')" @select="block(u)"></ds-dropdown-menu-item>
+                      <ds-dropdown-menu-item :label="t('Odebrat')" class="acct-danger-text" @select="del(u)"></ds-dropdown-menu-item>
+                    </ds-dropdown-menu>
+                  </td>
+                </tr>
+              </tbody>
+            </ds-table>
+            <empty-state v-else title="Zatím tu nemáte žádné kolegy" text="Přidejte kolegu a určete, co smí ve firemním účtu dělat.">
+              <ds-button @click="openForm(null)">{{ t('Přidat kolegu') }}</ds-button>
+            </empty-state>
+          <form-modal v-model:open="f.open" :title="f.id ? 'Upravit kolegu' : 'Přidat kolegu'" :subtitle="f.id ? undefined : 'Kolega dostane e-mail s pozvánkou do firemního účtu.'"
+            :submit-label="f.id ? 'Uložit' : 'Odeslat pozvánku'" @submit="submit">
+            <div v-if="f.id" class="fld2"><span class="lbl-t">{{ t('E-mail') }}</span><b>{{ f.email }}</b></div>
+            <field v-else label="E-mail kolegy" type="email" req v-model="f.email" placeholder="např. jmeno@firma.cz" :error="f.err.email"></field>
+            <div class="row2"><field label="Jméno" v-model="f.first"></field><field label="Příjmení" v-model="f.last"></field></div>
+            <fieldset class="fset">
+              <legend class="lbl-t">{{ t('Role') }}</legend>
+              <ds-radio-group v-model="f.role" class="radios">
+                <ds-inline-field-label v-for="(r, k) in roles" :key="k" class="acct-radio" :for="'role-' + k">
+                  <ds-radio :id="'role-' + k" :value="k"></ds-radio>
+                  <template #label><span><b>{{ t(r.label) }}</b><span class="rdesc">{{ t(r.desc) }}</span></span></template>
+                </ds-inline-field-label>
+              </ds-radio-group>
+              <ds-field-message v-if="f.err.role" role="alert" class="fld-err">{{ t(f.err.role) }}</ds-field-message>
+            </fieldset>
+            <fieldset v-if="f.role !== 'admin'" class="fset">
+              <legend class="lbl-t">{{ t('Provozovny, pro které smí nakupovat') }}</legend>
+              <ds-radio-group v-model="f.scope" class="radios">
+                <ds-inline-field-label class="acct-radio" for="scope-all"><ds-radio id="scope-all" value="all"></ds-radio><template #label>{{ t('Všechny provozovny') }}</template></ds-inline-field-label>
+                <ds-inline-field-label class="acct-radio" for="scope-some"><ds-radio id="scope-some" value="some"></ds-radio><template #label>{{ t('Jen vybrané provozovny') }}</template></ds-inline-field-label>
+              </ds-radio-group>
+              <div v-if="f.scope === 'some'" class="site-pick">
+                <ds-inline-field-label v-for="s in App.S.sites" :key="s.id" class="acct-radio" :for="'sp-' + s.id">
+                  <ds-checkbox :id="'sp-' + s.id" :checked="f.sites.includes(s.id)" @update:checked="toggleSite(s.id, $event)"></ds-checkbox>
+                  <template #label>{{ s.name }}<span v-if="s.blocked" class="muted"> ({{ t('zablokovaná') }})</span></template>
+                </ds-inline-field-label>
+              </div>
+            </fieldset>
+          </form-modal>
+          </template>
+        </page-state>`
     }
-  });
-
-  function form(u) {
-    const R = MockData.roles, sites = App.S.sites;
-    const all = u.role === 'admin' || u.sites === 'all';
-    return (u.id ? `<div class="fld"><label>E-mail</label><b>${esc(u.email)}</b></div>` : field('E-mail kolegy', 'email', '', { type: 'email', req: true, ph: 'např. jmeno@firma.cz' })) +
-      `<div class="row2">${field('Jméno', 'first', u.first)}${field('Příjmení', 'last', u.last)}</div>
-      <div class="lbl-t" style="margin-bottom:6px">Role</div>
-      <div class="tiles">${Object.keys(R).map(k => `<label class="tile"><input type="radio" name="role" value="${k}" ${u.role === k ? 'checked' : ''}><div><b>${R[k].label}</b><span>${esc(R[k].desc)}</span></div></label>`).join('')}</div>
-      <div id="sites-box" ${u.role === 'admin' ? 'hidden' : ''}><div class="lbl-t" style="margin:12px 0 6px">Provozovny, pro které smí nakupovat</div>
-        <label class="check"><input type="radio" name="scope" value="all" ${all ? 'checked' : ''}><span>Všechny provozovny</span></label>
-        <label class="check"><input type="radio" name="scope" value="some" ${all ? '' : 'checked'}><span>Jen vybrané provozovny</span></label>
-        <div id="site-list" style="margin:4px 0 0 26px" ${all ? 'hidden' : ''}>${sites.map(s => `<label class="check"><input type="checkbox" name="site" value="${s.id}" ${!all && u.sites.includes(s.id) ? 'checked' : ''}><span>${esc(s.name)}${s.blocked ? ' <span class="badge bad">zablokovaná</span>' : ''}<br><span class="muted">${esc(s.address)}</span></span></label>`).join('') || '<span class="muted">Zatím nemáte žádnou provozovnu.</span>'}</div></div>`;
-  }
-  function wire(ov) {
-    const sync = () => {
-      const role = ov.querySelector('[name=role]:checked').value, scope = ov.querySelector('[name=scope]:checked').value;
-      ov.querySelector('#sites-box').hidden = role === 'admin';
-      ov.querySelector('#site-list').hidden = scope === 'all';
-    };
-    ov.addEventListener('change', sync);
-  }
-  const collect = (d, base) => {
-    base.first = (d.first || '').trim(); base.last = (d.last || '').trim(); base.role = d.role;
-    base.sites = d.role === 'admin' || d.scope === 'all' ? 'all' : [].concat(d.site || []);
-  };
-  const find = el => App.S.users.find(u => u.id === el.dataset.id);
-
-  App.on('u-add', () => dialog({
-    title: 'Přidat kolegu', sub: 'Kolega dostane e-mail s pozvánkou do firemního účtu.', wide: true, submit: 'Odeslat pozvánku', onOpen: wire,
-    body: form({ first: '', last: '', role: 'buyer', sites: 'all' }),
-    onSubmit(d) {
-      const email = (d.email || '').trim().toLowerCase(), c = App.S.company;
-      if (!emailOk(email)) return { field: 'email', msg: 'Zadejte e-mail ve tvaru jmeno@firma.cz.' };
-      if (App.S.users.some(u => u.email === email)) return { field: 'email', msg: 'Tento kolega už ve firmě je.' };
-      if (c.onlyCompanyEmail && !c.domains.includes(email.split('@')[1])) return { field: 'email', msg: 'Použijte firemní e-mail (' + c.domains.map(x => '@' + x).join(', ') + ').' };
-      const u = { id: 'u' + Date.now(), email, status: 'invited' }; collect(d, u); App.S.users.push(u); App.render(); toast('Pozvánka byla odeslána na ' + email + '.');
-    }
-  }));
-
-  App.on('u-edit', el => {
-    const u = find(el);
-    dialog({ title: 'Upravit kolegu', sub: u.email, wide: true, onOpen: wire, body: form(u),
-      onSubmit(d) {
-        if (u.role === 'admin' && d.role !== 'admin' && App.S.users.filter(x => x.role === 'admin' && x.status !== 'blocked').length < 2)
-          return { field: 'first', msg: 'Ve firmě musí zůstat alespoň jeden správce.' };
-        collect(d, u); App.render(); toast('Změny jsou uložené.');
-      } });
-  });
-
-  App.on('u-resend', el => toast('Pozvánka byla odeslána znovu na ' + find(el).email + '.'));
-
-  App.on('u-block', el => {
-    const u = find(el);
-    if (u.status === 'blocked') { u.status = 'active'; App.render(); return toast('Kolega je odblokovaný.'); }
-    confirmDialog('Zablokovat kolegu?', 'Kolega se nebude moct přihlásit ani nakupovat. Odblokovat ho můžete kdykoli.', 'Zablokovat', () => { u.status = 'blocked'; App.render(); toast('Kolega je zablokovaný.'); });
-  });
-
-  App.on('u-del', el => {
-    const u = find(el);
-    if (u.role === 'admin' && App.S.users.filter(x => x.role === 'admin').length < 2)
-      return dialog({ title: 'Kolegu nelze odebrat', sub: 'Ve firmě musí zůstat alespoň jeden správce. Nejdřív určete správcem jiného kolegu.', submit: null, cancel: 'Rozumím' });
-    confirmDialog('Odebrat kolegu?', u.email + ' ztratí přístup do firemního účtu. Jeho objednávky zůstanou zachované.', 'Odebrat', () => { App.S.users = App.S.users.filter(x => x !== u); App.render(); toast('Kolega je odebraný.'); });
   });
 })();
