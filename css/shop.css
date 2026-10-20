@@ -8,10 +8,12 @@
 .circ { width: 40px; height: 40px; border-radius: 99px; background: #cddff9; border: 0; display: grid; place-items: center; padding: 0; }
 .circ img { width: 20px; height: 20px; }
 .circ:hover { background: #bcd3f6; }
-.hdr .co-btn { display: flex; align-items: center; gap: 8px; background: none; border: 0; color: #fff; font-weight: 600; font-size: 14px; padding: 0 0 0 8px; max-width: 280px; }
-.hdr .co-btn .ico-building { width: 24px; height: 24px; filter: brightness(0) invert(1); }
+/* company button = same light-blue set as the bell (.circ): pill on desktop, round icon button on mobile */
+.hdr .co-btn { display: flex; align-items: center; gap: 8px; height: 40px; background: #cddff9; border: 0; border-radius: 99px; color: var(--navy); font-weight: 600; font-size: 14px; padding: 0 12px 0 12px; max-width: 280px; }
+.hdr .co-btn:hover, .hdr .co-btn[aria-expanded="true"] { background: #bcd3f6; }
+.hdr .co-btn .ico-building { width: 20px; height: 20px; flex: none; }
 .hdr .co-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hdr .co-btn img.chev { width: 20px; height: 20px; filter: brightness(0) invert(1); }
+.hdr .co-btn img.chev { width: 20px; height: 20px; flex: none; }
 .hdr-actions { gap: 12px; }
 .pop-host { position: relative; }
 .pop-host > .pop { top: calc(100% + 8px); }
@@ -96,7 +98,7 @@
 @media (max-width: 768px) {
   .hdr-addr { display: none; }
   .hdr .co-btn span, .hdr .co-btn img.chev { display: none; }
-  .hdr .circ { width: 36px; height: 36px; }
+  .hdr .circ, .hdr .co-btn { width: 36px; height: 36px; padding: 0; justify-content: center; }
   .deliv-bar { display: flex; align-items: center; gap: 8px; background: #cddff9; padding: 8px 12px; font-size: 13px; color: var(--navy); width: 100%; border: 0; text-align: left; position: relative; }
   .deliv-bar b { font-weight: 600; }
   .deliv-bar img { width: 18px; height: 18px; margin-left: auto; }
