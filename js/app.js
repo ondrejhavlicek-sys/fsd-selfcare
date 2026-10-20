@@ -13,15 +13,19 @@
     S: Vue.reactive({}), pages: {}, shopPages: {}, handlers: {},
     reset() {
       const d = clone(MockData), keep = App.S;
-      Object.assign(App.S, { company: d.company, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
+      Object.assign(App.S, { company: d.company, staff: d.staff, authz: d.authz, payments: d.payments, agreements: d.agreements, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
         lists: clone(ShopData.lists), cart: {}, siteId: keep.siteId || 's1', lang: keep.lang || 'cs',
-        role: keep.role || 'admin', scenario: keep.scenario || 'normal', pop: false, cartOpen: false,
+        role: keep.role || 'owner', scenario: keep.scenario || 'normal', pop: false, cartOpen: false,
         scn: keep.scn !== undefined ? keep.scn : innerWidth >= 1500, type: keep.type });
     },
     register(id, def) { App.pages[id] = def; },
     registerShop(id, def) { App.shopPages[id] = def; },
     on(name, fn) { App.handlers[name] = fn; },
-    isAdmin: () => App.S.role === 'admin',
+    /* Vlastník and Správce účtu both have admin rights; only the owner is the top role */
+    isAdmin: () => App.S.role === 'owner' || App.S.role === 'admin',
+    isOwner: () => App.S.role === 'owner',
+    /* the user the prototype "is" for the selected role (used for personal consents) */
+    me: () => App.S.users.find(u => u.id === ({ owner: 'u1', admin: 'u6', buyer: 'u2', viewer: 'u7' })[App.S.role]),
     list: arr => (App.S.scenario === 'empty' ? [] : arr),
     siteName: id => (App.S.sites.find(s => s.id === id) || { name: '—' }).name,
     currentSite() { const a = App.S.sites.filter(s => !s.blocked); return a.find(s => s.id === App.S.siteId) || a[0] || null; },
@@ -29,12 +33,9 @@
     render
   };
 
-  const GROUPS = [
-    { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'favorites'] },
-    { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
-    { label: 'Firemní profil', pages: ['company', 'users', 'sites', 'roles', 'payments'] }
-  ];
-  const ROLE_NAMES = { admin: 'Správce', buyer: 'Nákupčí', viewer: 'Prohlížející' };
+  const ROLE_NAMES = { owner: 'Vlastník', admin: 'Správce účtu', buyer: 'Nákupčí', viewer: 'Prohlížející' };
+  /* renamed or merged pages keep working: old hash -> new page */
+  const REDIRECTS = { newsletter: 'privacy' };
 
   function route() {
     const h = location.hash;
@@ -43,7 +44,9 @@
     if (!m) return { shop: 'home' };
     const id = m[1];
     if (!id) return mobile() ? { hub: true } : { id: 'company' };
-    return { id: App.pages[id] ? id : 'company' };
+    const rid = REDIRECTS[id] || id;
+    if (REDIRECTS[id]) history.replaceState(null, '', '#/ucet/' + rid);
+    return { id: App.pages[rid] ? rid : 'company' };
   }
 
   /* ---------- shared shell ---------- */
@@ -52,10 +55,6 @@
     const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Košík a ceny se vztahují k vybrané provozovně.</div>
       ${S.sites.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(s.name)}<br><span class="muted">${esc(s.address)}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní provozovnu.</span>'}
       <hr><a class="item" href="#/ucet/sites">Spravovat provozovny</a></div>` : '';
-    const acctPop = S.pop === 'acct' ? `<div class="pop" role="menu"><div class="co">${esc(c.name)}</div><div class="ico">IČ: ${esc(c.ico)} · ${ROLE_NAMES[S.role]}</div>
-      <button class="btn soft sm" style="width:100%" data-act="personal">Přepnout na osobní účet</button><hr>
-      ${GROUPS.flatMap(g => g.pages).map(id => `<a class="item" role="menuitem" href="#/ucet/${id}">${esc(App.pages[id].label)}</a>`).join('')}
-      <hr><a class="item" href="#" data-act="logout">Odhlásit se</a></div>` : '';
     const addrLabel = site ? site.address : 'Žádná provozovna';
     const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
@@ -66,7 +65,7 @@
       ${sf('hdr-search')}
       <div class="hdr-actions">
         <button class="circ" data-act="bell" aria-label="Oznámení">${img('bell')}</button>
-        <div class="pop-host"><button class="co-btn" data-act="acct" aria-haspopup="true" aria-expanded="${S.pop === 'acct'}" aria-label="Firemní účet: ${esc(c.name)}">${icon('company', 'ico-building')}<span>${esc(c.name)}</span>${img('chevron-down', 'chev')}</button>${acctPop}</div>
+        <div id="acct-menu-slot"></div>
       </div></header>
       ${sf('m-search')}
       <button class="deliv-bar" data-act="addr"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
@@ -96,7 +95,7 @@
     const S = App.S;
     const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${l}</option>`;
     return `<div class="scn" data-no-i18n><button data-act="scn">${S.scn ? '▾' : '▸'} Prototype scenarios</button>${S.scn ? `<div class="scn-body">
-      <label>Role přihlášeného uživatele<select data-sel="role">${opt('admin', 'Správce', S.role)}${opt('buyer', 'Nákupčí', S.role)}${opt('viewer', 'Prohlížející', S.role)}</select></label>
+      <label>Role přihlášeného uživatele<select data-sel="role">${opt('owner', 'Vlastník', S.role)}${opt('admin', 'Správce účtu', S.role)}${opt('buyer', 'Nákupčí', S.role)}${opt('viewer', 'Prohlížející', S.role)}</select></label>
       <label>Stav seznamů<select data-sel="scenario">${opt('normal', 'Běžný', S.scenario)}${opt('empty', 'Prázdný', S.scenario)}${opt('loading', 'Načítání', S.scenario)}${opt('error', 'Chyba', S.scenario)}</select></label>
       <label>Typography<select data-sel="type">${opt('figma', 'Figma (Inter)', S.type)}${opt('makro', 'makro.cz (Lato)', S.type)}</select></label>
       <button class="btn soft sm" data-act="reset">Obnovit ukázková data</button></div>` : ''}</div>`;
@@ -121,12 +120,13 @@
       page = `<div class="page acct-page"><div id="acct-slot"></div></div>`;
       title = r.hub ? 'Firemní účet' : App.pages[r.id].label;
     }
-    Nav.detach(); Grid.detach(); Acct.detach(); Acct.sync(r);
+    Nav.detach(); Grid.detach(); Acct.detach(); AcctMenu.detach(); Acct.sync(r); AcctMenu.sync();
     Nav.sync(r);
     app.innerHTML = header() + subheader(r) + page + footer() + mobCart(r) + scenarioBox();
     Nav.attach(app.querySelector('#nav-slot'));
     Grid.attach(app.querySelector('#grid-slot'));
     Acct.attach(app.querySelector('#acct-slot'));
+    AcctMenu.attach(app.querySelector('#acct-menu-slot'));
     I18N.apply(app);
     document.title = I18N.t(title) + ' – makro distribuce';
   }

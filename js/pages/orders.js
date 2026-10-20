@@ -69,24 +69,4 @@
     label: 'Oznámení', icon: 'BellOutline',
     comp: { setup: () => ({}), template: `<page-state title="Oznámení"><empty-state title="Nemáte žádná nová oznámení" text="Dáme vám vědět, až se u vašich objednávek nebo ve firemním účtu něco změní."></empty-state></page-state>` }
   });
-
-  App.register('newsletter', {
-    label: 'Odběr novinek', icon: 'Envelope',
-    comp: {
-      setup() {
-        const opts = reactive([
-          { id: 'offers', title: 'Akční nabídky', text: 'Týdenní přehled slev a novinek v sortimentu.', on: true },
-          { id: 'news', title: 'Novinky a tipy', text: 'Informace o službách makro distribuce a tipy pro vaše podnikání.', on: false }
-        ]);
-        const change = (o, v) => { o.on = v; toast(v ? 'Odběr je zapnutý.' : 'Odběr je vypnutý.'); };
-        return { t, opts, change, App };
-      },
-      template: `
-        <page-state title="Odběr novinek">
-          <ds-message v-if="!App.isAdmin()" variant="info" class="mb" :title="t('Nastavení firmy vidíte jen ke čtení')" :body="t('Změny může provést správce firmy.')"></ds-message>
-          <section v-for="o in opts" :key="o.id" class="acct-card"><div class="rows"><h2>{{ t(o.title) }}</h2><span class="muted">{{ t(o.text) }}</span></div>
-            <div class="card-act"><span class="sw-lbl">{{ o.on ? t('Zapnuto') : t('Vypnuto') }}</span><ds-switch :checked="o.on" :disabled="!App.isAdmin()" :aria-label="t(o.title)" @update:checked="change(o, $event)"></ds-switch></div></section>
-        </page-state>`
-    }
-  });
 })();
