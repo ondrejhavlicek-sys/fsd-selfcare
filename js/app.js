@@ -13,15 +13,19 @@
     S: Vue.reactive({}), pages: {}, shopPages: {}, handlers: {},
     reset() {
       const d = clone(MockData), keep = App.S;
-      Object.assign(App.S, { company: d.company, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
+      Object.assign(App.S, { company: d.company, staff: d.staff, authz: d.authz, payments: d.payments, agreements: d.agreements, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
         lists: clone(ShopData.lists), cart: {}, siteId: keep.siteId || 's1', lang: keep.lang || 'cs',
-        role: keep.role || 'admin', scenario: keep.scenario || 'normal', pop: false, cartOpen: false,
+        role: keep.role || 'owner', scenario: keep.scenario || 'normal', pop: false, cartOpen: false,
         scn: keep.scn !== undefined ? keep.scn : innerWidth >= 1500, type: keep.type });
     },
     register(id, def) { App.pages[id] = def; },
     registerShop(id, def) { App.shopPages[id] = def; },
     on(name, fn) { App.handlers[name] = fn; },
-    isAdmin: () => App.S.role === 'admin',
+    /* Vlastník and Správce účtu both have admin rights; only the owner is the top role */
+    isAdmin: () => App.S.role === 'owner' || App.S.role === 'admin',
+    isOwner: () => App.S.role === 'owner',
+    /* the user the prototype "is" for the selected role (used for personal consents) */
+    me: () => App.S.users.find(u => u.id === ({ owner: 'u1', admin: 'u6', buyer: 'u2', viewer: 'u7' })[App.S.role]),
     list: arr => (App.S.scenario === 'empty' ? [] : arr),
     siteName: id => (App.S.sites.find(s => s.id === id) || { name: '—' }).name,
     currentSite() { const a = App.S.sites.filter(s => !s.blocked); return a.find(s => s.id === App.S.siteId) || a[0] || null; },
@@ -32,9 +36,9 @@
   const GROUPS = [
     { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'favorites'] },
     { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
-    { label: 'Firemní profil', pages: ['company', 'users', 'sites', 'roles', 'payments'] }
+    { label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] }
   ];
-  const ROLE_NAMES = { admin: 'Správce', buyer: 'Nákupčí', viewer: 'Prohlížející' };
+  const ROLE_NAMES = { owner: 'Vlastník', admin: 'Správce účtu', buyer: 'Nákupčí', viewer: 'Prohlížející' };
 
   function route() {
     const h = location.hash;
@@ -52,7 +56,7 @@
     const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Košík a ceny se vztahují k vybrané provozovně.</div>
       ${S.sites.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(s.name)}<br><span class="muted">${esc(s.address)}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní provozovnu.</span>'}
       <hr><a class="item" href="#/ucet/sites">Spravovat provozovny</a></div>` : '';
-    const acctPop = S.pop === 'acct' ? `<div class="pop" role="menu"><div class="co">${esc(c.name)}</div><div class="ico">IČ: ${esc(c.ico)} · ${ROLE_NAMES[S.role]}</div>
+    const acctPop = S.pop === 'acct' ? `<div class="pop" role="menu"><div class="co">${esc(c.name)}</div><div class="ico">IČO: ${esc(c.ico)} · ${ROLE_NAMES[S.role]}</div>
       <button class="btn soft sm" style="width:100%" data-act="personal">Přepnout na osobní účet</button><hr>
       ${GROUPS.flatMap(g => g.pages).map(id => `<a class="item" role="menuitem" href="#/ucet/${id}">${esc(App.pages[id].label)}</a>`).join('')}
       <hr><a class="item" href="#" data-act="logout">Odhlásit se</a></div>` : '';
@@ -96,7 +100,7 @@
     const S = App.S;
     const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${l}</option>`;
     return `<div class="scn" data-no-i18n><button data-act="scn">${S.scn ? '▾' : '▸'} Prototype scenarios</button>${S.scn ? `<div class="scn-body">
-      <label>Role přihlášeného uživatele<select data-sel="role">${opt('admin', 'Správce', S.role)}${opt('buyer', 'Nákupčí', S.role)}${opt('viewer', 'Prohlížející', S.role)}</select></label>
+      <label>Role přihlášeného uživatele<select data-sel="role">${opt('owner', 'Vlastník', S.role)}${opt('admin', 'Správce účtu', S.role)}${opt('buyer', 'Nákupčí', S.role)}${opt('viewer', 'Prohlížející', S.role)}</select></label>
       <label>Stav seznamů<select data-sel="scenario">${opt('normal', 'Běžný', S.scenario)}${opt('empty', 'Prázdný', S.scenario)}${opt('loading', 'Načítání', S.scenario)}${opt('error', 'Chyba', S.scenario)}</select></label>
       <label>Typography<select data-sel="type">${opt('figma', 'Figma (Inter)', S.type)}${opt('makro', 'makro.cz (Lato)', S.type)}</select></label>
       <button class="btn soft sm" data-act="reset">Obnovit ukázková data</button></div>` : ''}</div>`;

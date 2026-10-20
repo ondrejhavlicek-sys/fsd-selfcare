@@ -8,17 +8,19 @@
   /* reading App.S.lang inside templates makes every t() call re-translate on a language switch */
   const t = s => { void App.S.lang; return I18N.t(s); };
 
-  const state = reactive({ route: { id: 'company', hub: false }, mobile: false, dlg: null });
+  const state = reactive({ route: { id: 'company', hub: false }, mobile: false, dlg: null, req: { open: false, topic: '', note: '', err: '' } });
 
   /* sidebar groups (kosik.cz profile structure; Provozovny and Role are our additions in "Firemní profil") */
   const GROUPS = [
     { label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'lists', 'favorites'] },
     { label: 'Komunikace', pages: ['notifications', 'newsletter'] },
-    { label: 'Firemní profil', pages: ['company', 'users', 'sites', 'roles', 'payments'] }
+    { label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] }
   ];
   /* nav entries that are not account pages */
   const EXTRA = { lists: { label: 'Nákupní seznamy', icon: 'ShoppingListSolid', href: '#/seznamy' } };
   const meta = id => EXTRA[id] || App.pages[id];
+  /* page access: `admin` = owner + account administrator; `roles` = explicit list */
+  const isLocked = p => p.roles ? !p.roles.includes(App.S.role) : !!(p.admin && !App.isAdmin());
 
   /* ---- shared small components ---- */
   const PageHead = {
@@ -85,13 +87,53 @@
       </div>`
   };
 
+
+  /* tag marking non-MVP items ("Později", "Nice to have") and unconfirmed fields ("Ověřit") */
+  const LaterTag = {
+    props: { label: { type: String, default: 'Později' } },
+    setup: () => ({ t }),
+    template: `<product-tag class="later-tag" variant="neutral" :label="t(label)"></product-tag>`
+  };
+
+  /* block set by makro staff (not editable by the customer): lock icon, "Spravuje makro" hint, "Požádat o změnu" */
+  const StaffCard = {
+    props: { title: String, topic: String, noRequest: Boolean },
+    setup: () => ({ t, I, App, request: topic => { state.req = { open: true, topic, note: '', err: '' }; } }),
+    template: `
+      <section class="acct-card staff">
+        <div class="rows">
+          <div class="staff-h"><h2>{{ t(title) }}</h2><span class="staff-lock"><component :is="I.PadlockSolid" class="lock-ico"></component>{{ t('Spravuje makro') }}</span></div>
+          <slot></slot>
+        </div>
+        <ds-button v-if="App.isAdmin() && !noRequest" variant="secondary" size="sm" @click="request(topic || title)">{{ t('Požádat o změnu') }}</ds-button>
+      </section>`
+  };
+
+
+  /* labelled Fresh Select; options: [{ value, label }] (labels are Czech source strings) */
+  const SelField = {
+    props: { label: String, modelValue: [String, Number, null], options: Array, error: String, placeholder: { type: String, default: 'Vyberte' } },
+    emits: ['update:modelValue'],
+    setup(props) {
+      const opts = computed(() => props.options.map(o => ({ value: o.value, label: t(o.label) })));
+      return { t, opts, uid: 's' + Math.random().toString(36).slice(2, 8) };
+    },
+    template: `
+      <div class="fld2">
+        <ds-field-label :for="uid" :invalid="!!error">{{ t(label) }}</ds-field-label>
+        <ds-select :id="uid" :model-value="modelValue" :options="opts" option-value="value" option-label="label" :invalid="!!error" popover
+            :aria-label="t(label)" :labels="{ placeholder: t(placeholder) }" @update:model-value="$emit('update:modelValue', $event)"></ds-select>
+        <ds-field-message v-if="error" role="alert" class="fld-err">{{ t(error) }}</ds-field-message>
+      </div>`
+  };
+
   const SideNav = {
     setup() {
       const c = computed(() => App.S.company);
       const cur = computed(() => state.route.hub ? '' : state.route.id);
       const count = id => id === 'users' ? App.S.users.length : null;
       const href = id => (meta(id).href || '#/ucet/' + id);
-      const lock = id => !!(App.pages[id] && App.pages[id].admin && !App.isAdmin());
+      const lock = id => !!(App.pages[id] && isLocked(App.pages[id]));
       const personal = () => UI.toast('Přepnutí na osobní účet není součástí prototypu.');
       const edit = () => { location.hash = '#/ucet/company'; };
       return { t, c, cur, count, href, lock, meta, GROUPS, I, personal, edit, App, state };
@@ -99,7 +141,7 @@
     template: `
       <aside class="side" :aria-label="t('Firemní účet')">
         <div class="who-box">
-          <div class="who"><div><b>{{ c.name }}</b><span>{{ t('IČ') }}: {{ c.ico }}</span></div>
+          <div class="who"><div><b>{{ c.name }}</b><span>{{ t('IČO') }}: {{ c.ico }}</span></div>
             <ds-icon-button v-if="App.isAdmin()" variant="ghost" size="sm" :icon="I.EditSolid" :aria-label="t('Upravit firemní informace')" @click="edit"></ds-icon-button></div>
           <ds-button variant="secondary" size="md" class="who-btn" @click="personal">{{ t('Přepnout na osobní účet') }}</ds-button>
         </div>
@@ -109,7 +151,7 @@
             <component :is="I[meta(id).icon]" class="nav-ico"></component>
             <span class="nav-lbl">{{ t(meta(id).label) }}</span>
             <span v-if="count(id) != null" class="nav-cnt">{{ count(id) }}</span>
-            <component v-if="lock(id)" :is="I.Padlock" class="nav-lock" :aria-label="t('Jen pro správce')"></component>
+            <component v-if="lock(id)" :is="I.Padlock" class="nav-lock" :aria-label="t('Omezený přístup')"></component>
           </a>
         </nav>
       </aside>`
@@ -147,8 +189,12 @@
     components: { SideNav, SharedDialog, Crumbs, PageHead },
     setup() {
       const comp = computed(() => { const p = App.pages[state.route.id]; return p && p.comp; });
-      const locked = computed(() => { const p = App.pages[state.route.id]; return p && p.admin && !App.isAdmin(); });
-      return { state, comp, locked, t, App, I };
+      const locked = computed(() => { const p = App.pages[state.route.id]; return p && isLocked(p); });
+      const sendRequest = () => {
+        if (!state.req.note.trim()) return state.req.err = 'Napište nám, co chcete změnit.';
+        state.req.open = false; UI.toast('Žádost jsme poslali vašemu obchodnímu zástupci.');
+      };
+      return { state, comp, locked, t, App, I, sendRequest };
     },
     template: `
       <div class="acct" :class="{ 'on-hub': state.route.hub }">
@@ -166,6 +212,9 @@
           </main>
         </div>
         <shared-dialog></shared-dialog>
+        <form-modal v-model:open="state.req.open" title="Požádat o změnu" :subtitle="state.req.topic" submit-label="Odeslat žádost" @submit="sendRequest">
+          <field label="Co chcete změnit?" textarea v-model="state.req.note" :error="state.req.err"></field>
+        </form-modal>
       </div>`
   };
 
@@ -175,7 +224,7 @@
   let mounted = false;
 
   window.Acct = {
-    state, t, PageHead, EmptyState, PageState, FormModal, Field,
+    state, t, PageHead, EmptyState, PageState, FormModal, Field, LaterTag, StaffCard,
     sync(r) { state.route = { id: r.id || 'company', hub: !!r.hub }; state.mobile = matchMedia('(max-width: 768px)').matches; },
     confirm(o) { state.dlg = o; },
     detach() { if (host.parentNode) host.remove(); },
@@ -186,7 +235,7 @@
         mounted = true;
         Fresh.mount(AccountArea, host, app => {
           app.component('page-head', PageHead); app.component('empty-state', EmptyState); app.component('page-state', PageState);
-          app.component('form-modal', FormModal); app.component('field', Field);
+          app.component('form-modal', FormModal); app.component('field', Field); app.component('later-tag', LaterTag); app.component('sel-field', SelField); app.component('staff-card', StaffCard);
           (Acct.register || []).forEach(f => f(app));
         });
       }
