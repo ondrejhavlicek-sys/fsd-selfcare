@@ -47,3 +47,19 @@ article[data-tid="product-box"] .tw-bg-ds-primary-off-light { background-color: 
 article[data-tid="product-box"] .tw-text-ds-primary { color: var(--navy); }
 article[data-tid="product-box"] [class*="E01F56"] { background-color: #990052; color: #fff; }
 article[data-tid="product-box"] .a-tag { color: var(--blue); }
+
+/* Table (Fresh): grey row cards stay, corners square */
+.ds-table tbody td:first-child, .ds-table tbody td:last-child { border-radius: 0; }
+
+/* Fresh utility colours that carry the Kosik purple (used inside several components). The html body prefix
+   outweighs the runtime-generated Tailwind rules. */
+html body .tw-text-ds-primary, html body .tw-text-ds-link { color: var(--navy); }
+html body .tw-text-ds-link { color: var(--blue-link); }
+html body .tw-bg-ds-primary { background-color: var(--blue); }
+html body .tw-bg-ds-primary-off-light, html body .tw-bg-ds-secondary { background-color: var(--soft); }
+html body .tw-border-ds-primary { border-color: var(--blue); }
+html body [data-cid="ds-breadcrumbs-separator"] { color: var(--blue); --ds-icon-fill-primary: var(--blue); }
+html body [data-cid="ds-breadcrumbs-separator"] * { fill: var(--blue); }
+
+/* Product tag: neutral = makro soft blue; green / red keep their semantic colours */
+html body [data-cid="ds-product-tag"].tw-bg-ds-secondary { background-color: var(--soft); color: var(--navy); }

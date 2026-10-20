@@ -12,7 +12,7 @@ window.Fresh = (function () {
     let tries = 0;
     (function wait() {
       if (getComputedStyle(probe).fontSize === '11px' || tries++ > 120) { probe.remove(); resolve(); return; }
-      requestAnimationFrame(wait);
+      setTimeout(wait, 16);
     })();
   });
   /* Mount a component into a (possibly detached) element. Returns the Vue app. */

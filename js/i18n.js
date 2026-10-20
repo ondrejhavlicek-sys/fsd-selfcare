@@ -7,6 +7,19 @@ window.I18N = (function () {
   /* [cs, en, vi] */
   [
     /* shell */
+    /* company account: kosik.cz-style navigation and light pages */
+    ['Přehled úspor', 'Savings overview', 'Tổng quan tiết kiệm'], ['Nákupní seznamy', 'Shopping lists', 'Danh sách mua sắm'], ['Moje oblíbené', 'My favourites', 'Yêu thích của tôi'],
+    ['Komunikace', 'Communication', 'Liên lạc'], ['Odběr novinek', 'Newsletter', 'Đăng ký nhận tin'], ['Upravit firemní informace', 'Edit company information', 'Sửa thông tin công ty'],
+    ['Jen pro správce', 'Administrators only', 'Chỉ dành cho quản trị viên'], ['Akce kolegy', 'Colleague actions', 'Thao tác với đồng nghiệp'],
+    ['Zatím tu není co zobrazit', 'There is nothing to show yet', 'Chưa có gì để hiển thị'],
+    ['Až nakoupíte za akční ceny, ukážeme vám, kolik jste ušetřili.', 'Once you buy at deal prices, we will show you how much you saved.', 'Khi bạn mua với giá khuyến mãi, chúng tôi sẽ cho bạn thấy đã tiết kiệm bao nhiêu.'],
+    ['Zatím nemáte žádné oblíbené produkty', 'You have no favourite products yet', 'Bạn chưa có sản phẩm yêu thích nào'],
+    ['Oblíbené produkty najdete tady a přidáte je do košíku na jedno kliknutí.', 'You will find your favourite products here and can add them to the cart in one click.', 'Sản phẩm yêu thích sẽ nằm ở đây và bạn có thể thêm vào giỏ hàng chỉ bằng một cú nhấp.'],
+    ['Přejít do obchodu', 'Go to the shop', 'Đến cửa hàng'], ['Nemáte žádná nová oznámení', 'You have no new notifications', 'Bạn không có thông báo mới'],
+    ['Dáme vám vědět, až se u vašich objednávek nebo ve firemním účtu něco změní.', 'We will let you know when something changes with your orders or in the company account.', 'Chúng tôi sẽ báo cho bạn khi đơn hàng hoặc tài khoản công ty có thay đổi.'],
+    ['Akční nabídky', 'Deals', 'Ưu đãi'], ['Týdenní přehled slev a novinek v sortimentu.', 'A weekly overview of deals and new products.', 'Tổng hợp hằng tuần về ưu đãi và sản phẩm mới.'],
+    ['Novinky a tipy', 'News and tips', 'Tin tức và mẹo'], ['Informace o službách makro distribuce a tipy pro vaše podnikání.', 'Information about makro distribuce services and tips for your business.', 'Thông tin về dịch vụ của makro distribuce và mẹo cho hoạt động kinh doanh của bạn.'],
+    ['Zapnuto', 'On', 'Bật'], ['Vypnuto', 'Off', 'Tắt'], ['Odběr je zapnutý.', 'The subscription is on.', 'Đã bật đăng ký nhận tin.'], ['Odběr je vypnutý.', 'The subscription is off.', 'Đã tắt đăng ký nhận tin.'],
     /* main navigation */
     ['Hlavní navigace', 'Main navigation', 'Điều hướng chính'], ['Zelenina', 'Vegetables', 'Rau củ'], ['Maso a ryby', 'Meat and fish', 'Thịt và cá'],
     ['Mléčné výrobky a vejce', 'Dairy and eggs', 'Sữa và trứng'], ['Pečivo', 'Bakery', 'Bánh mì và bánh ngọt'], ['Nápoje', 'Drinks', 'Đồ uống'],

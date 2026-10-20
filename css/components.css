@@ -21,26 +21,8 @@ html[data-type="makro"] .link, html[data-type="makro"] .tbtn { font-size: 16px; 
 .icon-btn svg { width: 18px; height: 18px; }
 
 /* panels (registration .panel: grey, padding 20) */
-.card { background: var(--panel); padding: 20px; margin-bottom: 16px; display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; }
-.card h2 { margin-bottom: 6px; }
-.card .rows { display: grid; gap: 2px; font-size: var(--fs-lbl); }
-.card .rows b { color: var(--ink-strong); }
 .muted { color: var(--muted); }
-.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.site-card { background: var(--panel); padding: 20px; display: grid; gap: 8px; align-content: start; font-size: var(--fs-lbl); }
-.site-card .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
-.site-card .acts { display: flex; gap: 20px; margin-top: 4px; flex-wrap: wrap; }
 
-/* tags: role = yellow tag like registration, badge = status, chip = info */
-.role { display: inline-block; background: var(--role-bg); color: var(--role-text); font-weight: 600; font-size: 11px; padding: 2px 6px; }
-html[data-type="makro"] .role { font-size: 13px; padding: 3px 8px; }
-.badge { display: inline-block; font-size: 11px; padding: 2px 6px; background: #e8ecf3; color: var(--blue-link); font-weight: 600; }
-html[data-type="makro"] .badge { font-size: 13px; padding: 3px 8px; }
-.badge.ok { background: #e8f5ee; color: var(--ok); }
-.badge.bad { background: #fdecee; color: var(--err); }
-.badge.warn { background: #fff4ec; color: var(--warn); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-size: var(--fs-small); padding: 3px 10px; background: var(--soft); color: var(--blue-link); }
 
 /* alerts (registration: tinted box, thin ring, 4px accent bar; info = hint box with white circle icon) */
 .alert { --c: var(--blue); --bg: var(--info); display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px 14px 14px; margin-bottom: 20px; background: var(--bg); border-left: 4px solid var(--c); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 22%, transparent); font-size: 14px; line-height: 1.45; color: var(--ink-strong); animation: fade .3s; }
@@ -66,11 +48,6 @@ html[data-type="makro"] .alert.info { font-size: 16px; line-height: 24px; --tag:
 .empty p { max-width: 420px; color: var(--ink); margin-bottom: 8px; }
 
 /* table */
-.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-lbl); }
-.tbl th { text-align: left; font-size: var(--fs-small); color: var(--muted); font-weight: 400; padding: 8px 10px; border-bottom: 1px solid var(--line); }
-.tbl td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-.tbl .acts { display: flex; flex-direction: column; align-items: flex-start; white-space: nowrap; }
-.tbl .email { overflow-wrap: anywhere; font-weight: var(--strong); color: var(--ink-strong); }
 
 /* forms (registration: bold 13px labels, 44px fields, dark custom checkbox/radio, white tiles) */
 .fld { display: grid; gap: 0; margin-bottom: 16px; }
@@ -129,18 +106,8 @@ html[data-type="makro"] .dlg-h h2 { font-size: 24px; line-height: 32px; }
   .grab { display: block; width: 40px; height: 4px; background: #c4c9d0; margin: 0 auto 12px; border-radius: 2px; }
   .dlg-f { flex-direction: column-reverse; align-items: stretch; gap: 16px; text-align: center; }
   .dlg-f .btn { width: 100%; min-height: 48px; font-size: 16px; }
-  .grid2 { grid-template-columns: 1fr; }
   .row2 { grid-template-columns: 1fr; }
-  .card:not(:has(> .icon-btn)) { flex-direction: column; }
   .head .btn { width: 100%; min-height: 48px; font-size: 16px; }
-  /* table -> cards */
-  .tbl thead { display: none; }
-  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
-  .tbl tr { background: var(--panel); padding: 12px 16px; margin-bottom: 12px; }
-  .tbl td { border: 0; padding: 3px 0; }
-  .tbl td[data-label]::before { content: attr(data-label); display: block; font-size: var(--fs-small); color: var(--muted); }
-  .tbl td.acts-td { margin-top: 8px; }
-  .tbl .acts { flex-direction: row; flex-wrap: wrap; gap: 20px; }
 }
 @keyframes up { from { transform: translateY(40px); opacity: 0; } }
 

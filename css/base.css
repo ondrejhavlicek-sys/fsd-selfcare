@@ -41,29 +41,8 @@ html[data-type="makro"] .hdr-actions { font-size: 16px; }
 .crumbs a { color: #0064fe; text-decoration: none; }
 .crumbs a:hover { text-decoration: underline; }
 .crumbs .sep { display: inline-block; width: 14px; height: 14px; margin: 0 3px; vertical-align: -2px; background: #0064fe; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 2.5 9.5 7 5 11.5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 2.5 9.5 7 5 11.5' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat; }
-.shell { display: grid; grid-template-columns: 280px minmax(0, 800px); gap: 40px; align-items: start; }
-.shell.in-crumbs { margin-top: -0px; }
-.side { align-self: start; }
-.side .who-box, .nav-group { background: var(--panel); padding: 8px; }
-.side .who-box { padding: 16px 8px 8px; }
-.side .who { padding: 0 10px 12px; }
-.side .who b { color: var(--ink-strong); display: block; font-weight: var(--strong); }
-.side .who span { font-size: var(--fs-small); color: var(--muted); }
-.side .btn.soft { margin: 0 10px 8px; width: calc(100% - 20px); }
-.nav-group { margin-top: 12px; }
-.nav-group h3 { font-size: var(--fs-small); font-weight: 400; color: var(--muted); padding: 6px 10px 4px; }
-.nav-a { display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--ink-strong); text-decoration: none; font-weight: var(--strong); transition: background-color .15s; }
-.nav-a svg, .nav-a > img { width: 18px; height: 18px; color: var(--navy); flex: none; }
-.nav-a:hover { background: #fff; }
-.nav-a[aria-current="page"] { background: #fff; box-shadow: inset 4px 0 0 var(--blue); }
-.nav-a .lock { margin-left: auto; color: var(--muted); }
-.nav-a .lock svg { width: 14px; height: 14px; color: var(--muted); }
-.content { max-width: 800px; min-width: 0; }
 .head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 24px; flex-wrap: wrap; }
 .head h1 { margin: 0 0 8px; }
-.back { display: none; align-items: center; gap: 12px; background: none; border: 0; color: var(--ink); padding: 0; margin-bottom: 20px; font-size: var(--fs-lbl); text-decoration: none; }
-.back i { width: 32px; height: 32px; border-radius: 50%; background: var(--info); color: var(--navy); display: grid; place-items: center; font-style: normal; font-size: 16px; }
-.menu-list { display: none; }
 
 /* scenarios box (same look as registration "Prototype scenarios") */
 .scn { position: fixed; right: 12px; bottom: 12px; z-index: 40; background: #fff; border: 1px solid var(--line); box-shadow: 0 2px 12px rgba(0,0,0,.12); width: 230px; font-size: 12px; }
@@ -74,18 +53,11 @@ html[data-type="makro"] .hdr-actions { font-size: 16px; }
 
 @media (max-width: 768px) {
   .page { margin: 24px auto 120px; }
-  .shell { display: block; }
-  .side { display: none; }
-  .crumbs { display: none; }
   .brand { font-size: 26px; font-weight: 700; gap: 7px; }
   .logo { font-size: 26px; letter-spacing: -.5px; }
   .hdr-actions { gap: 12px; }
   .hdr-actions .login span { display: none; }
-  .back { display: flex; }
-  .on-hub .back { display: none; }
-  .menu-list { display: block; }
-  .on-hub .content > :not(.menu-list) { display: none; }
-  .pop { position: fixed; left: 0; right: 0; top: auto; bottom: 0; width: auto; padding-bottom: 24px; }
+    .on-hub     .pop { position: fixed; left: 0; right: 0; top: auto; bottom: 0; width: auto; padding-bottom: 24px; }
   .scn { right: 8px; bottom: 8px; }
 }
 @media (max-width: 400px) { .brand, .logo { font-size: 22px; } }
