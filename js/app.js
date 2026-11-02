@@ -31,7 +31,12 @@
     addrLine: a => a.street + ', ' + a.zip + ' ' + a.city,
     addrTitle: a => a.name || App.S.company.tradeName || (a.street + ', ' + a.city),
     addressName: id => { const a = App.S.addresses.find(x => x.id === id); return a ? App.addrTitle(a) : '—'; },
-    currentAddress() { const a = App.S.addresses.filter(s => !s.blocked); return a.find(s => s.id === App.S.addressId) || a.find(s => s.main) || a[0] || null; },
+    /* active addresses the current user may use: owner/admin/viewer (and buyers with access "all") see all, a buyer only the assigned ones; main address first */
+    selectable() {
+      const me = App.me(), all = !me || me.addresses === 'all' || App.isAdmin();
+      return App.S.addresses.filter(a => !a.blocked && (all || me.addresses.includes(a.id))).sort((x, y) => (y.main ? 1 : 0) - (x.main ? 1 : 0));
+    },
+    currentAddress() { const a = App.selectable(); return a.find(s => s.id === App.S.addressId) || a.find(s => s.main) || a[0] || null; },
     go(id) { location.hash = '#/ucet/' + id; },
     render
   };
@@ -55,15 +60,12 @@
   /* ---------- shared shell ---------- */
   function header() {
     const S = App.S, c = S.company, site = App.currentAddress();
-    const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Ceny a doručení se vztahují k vybrané dodací adrese.</div>
-      ${S.addresses.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(App.addrTitle(s))}<br><span class="muted">${esc(App.addrLine(s))}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní dodací adresu.</span>'}
-      <hr><a class="item" href="#/ucet/addresses">Spravovat dodací adresy</a></div>` : '';
     const addrLabel = site ? App.addrLine(site) : 'Žádná dodací adresa';
     const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
       <div class="hdr-left">
         <a class="brand" href="#/" data-act="clear-search"><span class="logo">makro</span><span>distribuce</span></a>
-        <div class="pop-host"><button class="hdr-addr" data-act="addr" aria-haspopup="true" aria-expanded="${S.pop === 'addr'}"><span><small>Vybraná dodací adresa</small><b>${esc(addrLabel)}</b></span>${img('chevron-right')}</button>${addrPop}</div>
+        <button class="hdr-addr" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span><small>Vybraná dodací adresa</small><b>${esc(addrLabel)}</b></span>${img('chevron-right')}</button>
       </div>
       ${sf('hdr-search')}
       <div class="hdr-actions">
@@ -71,7 +73,7 @@
         <div id="acct-menu-slot"></div>
       </div></header>
       ${sf('m-search')}
-      <button class="deliv-bar" data-act="addr"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
+      <button class="deliv-bar" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
   }
 
   /* the navigation bar is a Fresh Vue island (js/nav.js); the shell only leaves a slot for it */
@@ -145,14 +147,13 @@
     const act = el.dataset.act;
     const core = {
       acct() { if (mobile()) { App.S.pop = false; location.hash = '#/ucet'; } else togglePop('acct'); },
-      addr() { togglePop('addr'); },
+      addr() { AddrDrawer.open(); },
       cart() { Nav.openCart(); },
       bell() { UI.toast('Nemáte žádná nová oznámení.'); },
       mic() { UI.toast('Hlasové vyhledávání není součástí prototypu.'); },
       'clear-search'() { App.S.query = ''; if (location.hash === '#/' || location.hash === '') render(); else location.hash = '#/'; },
       soon(ev) { e.preventDefault(); UI.toast('Tato část není součástí prototypu.'); },
       checkout() { UI.toast(App.cart.count() ? 'Pokladna není součástí prototypu.' : 'Košík je prázdný.'); },
-      'pick-site'() { e.preventDefault(); App.S.addressId = el.dataset.id; App.S.pop = false; render(); UI.toast('Dodací adresa je změněná.'); },
       personal() { UI.toast('Přepnutí na osobní účet není součástí prototypu.'); },
       logout() { e.preventDefault(); App.S.pop = false; render(); UI.toast('Odhlášení není součástí prototypu.'); },
       scn() { App.S.scn = !App.S.scn; render(); },
@@ -173,7 +174,7 @@
     if (s.dataset.sel === 'type') store.set('sc-type', s.value);
     render();
   });
-  window.addEventListener('hashchange', () => { App.S.pop = false; UI.closeDialog(); render(); window.scrollTo(0, 0); });
+  window.addEventListener('hashchange', () => { App.S.pop = false; AddrDrawer.close(true); UI.closeDialog(); render(); window.scrollTo(0, 0); });
   let wasMobile = mobile();
   window.addEventListener('resize', () => { if (wasMobile !== mobile()) { wasMobile = mobile(); render(); } });
 
