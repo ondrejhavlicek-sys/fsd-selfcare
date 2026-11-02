@@ -73,7 +73,7 @@
       const setQty = (id, n) => {
         const cur = App.cart.qty(id);
         if (n > cur) {
-          if (!App.currentSite()) return UI.toast('Nejdřív vyberte aktivní provozovnu.');
+          if (!App.currentAddress()) return UI.toast('Nejdřív vyberte aktivní dodací adresu.');
           if (App.S.role === 'viewer') return UI.toast('S rolí Prohlížející nemůžete nakupovat.');
         }
         App.cart.set(id, n); App.render();

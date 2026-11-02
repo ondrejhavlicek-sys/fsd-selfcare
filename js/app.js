@@ -13,8 +13,8 @@
     S: Vue.reactive({}), pages: {}, shopPages: {}, handlers: {},
     reset() {
       const d = clone(MockData), keep = App.S;
-      Object.assign(App.S, { company: d.company, staff: d.staff, authz: d.authz, payments: d.payments, agreements: d.agreements, sites: d.sites, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
-        lists: clone(ShopData.lists), cart: {}, siteId: keep.siteId || 's1', lang: keep.lang || 'cs',
+      Object.assign(App.S, { company: d.company, staff: d.staff, authz: d.authz, payments: d.payments, agreements: d.agreements, addresses: d.addresses, users: d.users, orders: d.orders, credits: d.credits, card: d.card,
+        lists: clone(ShopData.lists), cart: {}, addressId: keep.addressId || 'a1', lang: keep.lang || 'cs',
         role: keep.role || 'owner', scenario: keep.scenario || 'normal', pop: false, cartOpen: false,
         scn: keep.scn !== undefined ? keep.scn : innerWidth >= 1500, type: keep.type });
     },
@@ -27,15 +27,18 @@
     /* the user the prototype "is" for the selected role (used for personal consents) */
     me: () => App.S.users.find(u => u.id === ({ owner: 'u1', admin: 'u6', buyer: 'u2', viewer: 'u7' })[App.S.role]),
     list: arr => (App.S.scenario === 'empty' ? [] : arr),
-    siteName: id => (App.S.sites.find(s => s.id === id) || { name: '—' }).name,
-    currentSite() { const a = App.S.sites.filter(s => !s.blocked); return a.find(s => s.id === App.S.siteId) || a[0] || null; },
+    /* delivery addresses: "Název provozovny" is optional, so the title falls back to the company trading name, then to street + city */
+    addrLine: a => a.street + ', ' + a.zip + ' ' + a.city,
+    addrTitle: a => a.name || App.S.company.tradeName || (a.street + ', ' + a.city),
+    addressName: id => { const a = App.S.addresses.find(x => x.id === id); return a ? App.addrTitle(a) : '—'; },
+    currentAddress() { const a = App.S.addresses.filter(s => !s.blocked); return a.find(s => s.id === App.S.addressId) || a.find(s => s.main) || a[0] || null; },
     go(id) { location.hash = '#/ucet/' + id; },
     render
   };
 
   const ROLE_NAMES = { owner: 'Vlastník', admin: 'Správce účtu', buyer: 'Nákupčí', viewer: 'Prohlížející' };
   /* renamed or merged pages keep working: old hash -> new page */
-  const REDIRECTS = { newsletter: 'privacy' };
+  const REDIRECTS = { newsletter: 'privacy', sites: 'addresses' };
 
   function route() {
     const h = location.hash;
@@ -51,11 +54,11 @@
 
   /* ---------- shared shell ---------- */
   function header() {
-    const S = App.S, c = S.company, site = App.currentSite();
-    const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Košík a ceny se vztahují k vybrané provozovně.</div>
-      ${S.sites.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(s.name)}<br><span class="muted">${esc(s.address)}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní provozovnu.</span>'}
-      <hr><a class="item" href="#/ucet/sites">Spravovat provozovny</a></div>` : '';
-    const addrLabel = site ? site.address : 'Žádná provozovna';
+    const S = App.S, c = S.company, site = App.currentAddress();
+    const addrPop = S.pop === 'addr' ? `<div class="pop left" role="menu"><div class="co">Vyberte adresu doručení</div><div class="ico">Ceny a doručení se vztahují k vybrané dodací adrese.</div>
+      ${S.addresses.filter(s => !s.blocked).map(s => `<a class="item ${site && site.id === s.id ? 'on' : ''}" href="#" role="menuitem" data-act="pick-site" data-id="${s.id}">${esc(App.addrTitle(s))}<br><span class="muted">${esc(App.addrLine(s))}</span></a>`).join('') || '<span class="muted">Nemáte žádnou aktivní dodací adresu.</span>'}
+      <hr><a class="item" href="#/ucet/addresses">Spravovat dodací adresy</a></div>` : '';
+    const addrLabel = site ? App.addrLine(site) : 'Žádná dodací adresa';
     const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
       <div class="hdr-left">
@@ -149,7 +152,7 @@
       'clear-search'() { App.S.query = ''; if (location.hash === '#/' || location.hash === '') render(); else location.hash = '#/'; },
       soon(ev) { e.preventDefault(); UI.toast('Tato část není součástí prototypu.'); },
       checkout() { UI.toast(App.cart.count() ? 'Pokladna není součástí prototypu.' : 'Košík je prázdný.'); },
-      'pick-site'() { e.preventDefault(); App.S.siteId = el.dataset.id; App.S.pop = false; render(); UI.toast('Dodací adresa je změněná.'); },
+      'pick-site'() { e.preventDefault(); App.S.addressId = el.dataset.id; App.S.pop = false; render(); UI.toast('Dodací adresa je změněná.'); },
       personal() { UI.toast('Přepnutí na osobní účet není součástí prototypu.'); },
       logout() { e.preventDefault(); App.S.pop = false; render(); UI.toast('Odhlášení není součástí prototypu.'); },
       scn() { App.S.scn = !App.S.scn; render(); },
