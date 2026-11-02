@@ -73,17 +73,17 @@ window.MockData = {
   },
   /* flat list of delivery addresses (no site layer). name = optional "Název provozovny"; licences 0..n per address */
   addresses: [
-    { id: 'a1', name: 'Restaurace U Mostu', street: 'Na Příkopě 15', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [50, 60], main: true, blocked: false,
+    { id: 'a1', area: 'praha', name: 'Restaurace U Mostu', street: 'Na Příkopě 15', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [50, 60], main: true, blocked: false,
       contact: 'Jana Nováková', phone: '+420 777 111 222', entrance: 'Boční ulice', floor: 'Přízemí', door: '', note: 'Zvonek „Kuchyně“.',
       days: [0, 1, 2, 3, 4], from: '06:00', to: '10:00', restrictions: ['avizo'], validFrom: '', validTo: '',
       licences: [{ id: 'l1', kind: 'alcohol', code: 'ALK-2024-0815', expiry: '2026-12-15' }, { id: 'l2', kind: 'tobacco', code: 'TAB-2024-0007', expiry: '2027-06-30' }] },
-    { id: 'a2', name: 'Letní zahrádka', street: 'Na Příkopě 22', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [42, 48], main: false, blocked: false,
+    { id: 'a2', area: 'praha', name: 'Letní zahrádka', street: 'Na Příkopě 22', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [42, 48], main: false, blocked: false,
       contact: 'Jana Nováková', phone: '+420 777 111 222', entrance: 'Vstup z nádvoří', floor: '', door: '', note: '',
       days: [0, 1, 2, 3, 4], from: '06:00', to: '10:00', restrictions: [], validFrom: '2026-05-01', validTo: '2026-09-30', licences: [] },
-    { id: 'a3', name: 'Bistro Brno', street: 'Masarykova 28', city: 'Brno', zip: '602 00', country: 'CZ', pin: [40, 45], main: false, blocked: false,
+    { id: 'a3', area: 'brno', name: 'Bistro Brno', street: 'Masarykova 28', city: 'Brno', zip: '602 00', country: 'CZ', pin: [40, 45], main: false, blocked: false,
       contact: 'Petr Dvořák', phone: '+420 777 333 444', entrance: 'Zadní dvůr', floor: '', door: 'č. 3', note: '',
       days: [0, 1, 2, 3, 4, 5], from: '07:00', to: '12:00', restrictions: ['rampa', 'vyska'], validFrom: '', validTo: '', licences: [] },
-    { id: 'a4', name: 'Hotel Plzeň', street: 'Americká 42', city: 'Plzeň', zip: '301 00', country: 'CZ', pin: [60, 50], main: false, blocked: true,
+    { id: 'a4', area: 'plzen', name: 'Hotel Plzeň', street: 'Americká 42', city: 'Plzeň', zip: '301 00', country: 'CZ', pin: [60, 50], main: false, blocked: true,
       contact: 'Marie Svobodová', phone: '+420 777 555 666', entrance: 'Recepce', floor: '', door: '', note: 'Příjem zboží u recepce.',
       days: [1, 3], from: '08:00', to: '14:00', restrictions: [], validFrom: '', validTo: '', licences: [{ id: 'l3', kind: 'tobacco', code: 'TAB-2025-0042', expiry: '2026-11-20' }] }
   ],
@@ -127,6 +127,8 @@ window.MockData.addressSuggestions = [
   { street: 'Masarykova 28', city: 'Brno', zip: '602 00' }, { street: 'Masarykova 5', city: 'Brno', zip: '602 00' }, { street: 'Americká 42', city: 'Plzeň', zip: '301 00' },
   { street: 'Náměstí Republiky 1', city: 'Plzeň', zip: '306 32' }, { street: 'Zlatnická 10', city: 'Praha 1', zip: '110 00' }
 ];
+/* ILLUSTRATIVE MOCK (not from a requirement): delivery area / distribution centre per address, used for the area banner in the address drawer */
+window.MockData.areas = { praha: 'Praha', brno: 'Brno', plzen: 'Plzeň' };
 window.MockData.countries = [{ value: 'CZ', label: 'Česko' }, { value: 'SK', label: 'Slovensko' }, { value: 'PL', label: 'Polsko' }, { value: 'DE', label: 'Německo' }, { value: 'AT', label: 'Rakousko' }, { value: 'HU', label: 'Maďarsko' }];
 /* per-user settings (docs/DATA-MODEL-DRAFT.md section 3): display toggles, SSO identities, e-mail verification, password */
 window.MockData.users.forEach(u => Object.assign(u, {

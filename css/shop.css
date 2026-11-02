@@ -162,3 +162,24 @@
 .am-user { display: flex; align-items: center; gap: 12px; padding: 16px 16px 4px; }
 .am-user b { font-weight: 700; }
 .am a:focus-visible, .am button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+/* delivery address drawer (kosik.cz-style cards; makro: square cards, round selection control) */
+.addr-drawer [data-cid="ds-drawer-close-button"], .addr-drawer button[aria-label*="avřít"], .addr-drawer button[aria-label*="lose"] { border-radius: 50% !important; border: 1.5px solid var(--ink-strong); }
+.ad-list { display: grid; gap: 12px; padding: 4px 0; }
+.ad-card { display: block; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.08), 0 0 4px rgba(0,0,0,.06); cursor: pointer; font-family: var(--font); }
+.ad-card:focus-within { outline: 2px solid var(--blue); outline-offset: 2px; }
+.ad-card.on { box-shadow: 0 0 0 2px var(--navy), 0 2px 4px rgba(0,0,0,.08); }
+.ad-area { display: block; background: #f3d9b1; color: #5c3200; text-align: center; font-weight: 700; font-size: var(--fs-small); padding: 4px 8px; border-bottom: 2px solid #c26a00; }
+.ad-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+.ad-pin { width: 44px; height: 44px; background: #f1f1f1; display: grid; place-items: center; flex: none; }
+.ad-pin .ad-pin-ico { width: 24px; height: 24px; color: var(--navy); }
+.ad-txt { display: grid; gap: 2px; flex: 1; min-width: 0; color: var(--ink-strong); font-size: var(--fs-base); line-height: 1.4; }
+.ad-name { color: var(--blue); font-weight: 600; }
+.ad-contact { font-weight: 700; }
+.ad-line { overflow-wrap: anywhere; }
+.ad-phone { color: var(--ink); }
+.ad-main { justify-self: start; margin-top: 4px; }
+.ad-empty { display: grid; gap: 12px; justify-items: start; padding: 16px 0; color: var(--ink-strong); }
+.ad-confirm { display: grid; gap: 16px; }
+.ad-confirm-addr { color: var(--ink-strong); }
+.ad-confirm-btns { display: grid; gap: 8px; }

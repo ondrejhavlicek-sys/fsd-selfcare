@@ -445,6 +445,15 @@ window.I18N = (function () {
     ['Ceny a doručení se vztahují k vybrané dodací adrese.', 'Prices and delivery apply to the selected delivery address.', 'Giá và giao hàng áp dụng cho địa chỉ giao hàng đã chọn.'],
     ['Nemáte žádnou aktivní dodací adresu.', 'You have no active delivery address.', 'Bạn không có địa chỉ giao hàng nào đang hoạt động.'],
     ['Nejdřív vyberte aktivní dodací adresu.', 'First select an active delivery address.', 'Trước tiên hãy chọn một địa chỉ giao hàng đang hoạt động.'],
+    /* delivery address drawer */
+    ['Vyberte dodací adresu', 'Select a delivery address', 'Chọn địa chỉ giao hàng'],
+    ['Změnit dodací adresu?', 'Change the delivery address?', 'Đổi địa chỉ giao hàng?'],
+    ['Změna adresy může změnit nabídku zboží a ceny. Položky, které na nové adrese nejsou k dispozici, odebereme z košíku.', 'Changing the address may change the product range and prices. Items that are not available at the new address will be removed from the cart.', 'Việc đổi địa chỉ có thể thay đổi danh mục sản phẩm và giá. Các mặt hàng không có tại địa chỉ mới sẽ bị xóa khỏi giỏ hàng.'],
+    ['Změnit adresu', 'Change address', 'Đổi địa chỉ'],
+    ['Ponechat stávající adresu', 'Keep the current address', 'Giữ địa chỉ hiện tại'],
+    ['Oblast doručení s odlišnou nabídkou zboží', 'Delivery area with a different product range', 'Khu vực giao hàng có danh mục sản phẩm khác'],
+    ['Nemáte žádnou dodací adresu, pro kterou smíte nakupovat.', 'You have no delivery address you may buy for.', 'Bạn không có địa chỉ giao hàng nào mà bạn được phép mua hàng.'],
+    ['Požádejte správce firmy, ať vám nějakou přidá.', 'Ask the company administrator to add one for you.', 'Hãy nhờ quản trị viên công ty thêm giúp bạn.'],
     /* main navigation */
     ['Hlavní navigace', 'Main navigation', 'Điều hướng chính'], ['Zelenina', 'Vegetables', 'Rau củ'], ['Maso a ryby', 'Meat and fish', 'Thịt và cá'],
     ['Mléčné výrobky a vejce', 'Dairy and eggs', 'Sữa và trứng'], ['Pečivo', 'Bakery', 'Bánh mì và bánh ngọt'], ['Nápoje', 'Drinks', 'Đồ uống'],
