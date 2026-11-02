@@ -30,7 +30,7 @@
     template: `
       <ds-drawer v-model:open="state.open" :title="t('Vyberte dodací adresu')" content-standout class="addr-drawer" @after-leave="state.pending = null">
         <div v-if="state.pending" class="ad-confirm">
-          <ds-message variant="warning" :title="t('Změnit dodací adresu?')" :body="t('Změna adresy může změnit nabídku zboží a ceny. Položky, které na nové adrese nejsou k dispozici, odebereme z košíku.')"></ds-message>
+          <ds-message variant="warning" :title="t('Změnit dodací adresu?')" :body="t('Změna adresy může změnit nabídku zboží a ceny. Zkontrolujte prosím obsah košíku.')"></ds-message>
           <p class="ad-confirm-addr"><b>{{ App.addrTitle(state.pending) }}</b><br>{{ App.addrLine(state.pending) }}</p>
           <div class="ad-confirm-btns"><ds-button size="lg" @click="apply(state.pending)">{{ t('Změnit adresu') }}</ds-button><ds-button size="lg" variant="ghost" @click="state.pending = null">{{ t('Ponechat stávající adresu') }}</ds-button></div>
         </div>

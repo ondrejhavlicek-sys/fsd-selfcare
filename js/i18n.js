@@ -448,7 +448,7 @@ window.I18N = (function () {
     /* delivery address drawer */
     ['Vyberte dodací adresu', 'Select a delivery address', 'Chọn địa chỉ giao hàng'],
     ['Změnit dodací adresu?', 'Change the delivery address?', 'Đổi địa chỉ giao hàng?'],
-    ['Změna adresy může změnit nabídku zboží a ceny. Položky, které na nové adrese nejsou k dispozici, odebereme z košíku.', 'Changing the address may change the product range and prices. Items that are not available at the new address will be removed from the cart.', 'Việc đổi địa chỉ có thể thay đổi danh mục sản phẩm và giá. Các mặt hàng không có tại địa chỉ mới sẽ bị xóa khỏi giỏ hàng.'],
+    ['Změna adresy může změnit nabídku zboží a ceny. Zkontrolujte prosím obsah košíku.', 'Changing the address may change the product range and prices. Please check the contents of your cart.', 'Việc đổi địa chỉ có thể thay đổi danh mục sản phẩm và giá. Vui lòng kiểm tra lại giỏ hàng của bạn.'],
     ['Změnit adresu', 'Change address', 'Đổi địa chỉ'],
     ['Ponechat stávající adresu', 'Keep the current address', 'Giữ địa chỉ hiện tại'],
     ['Oblast doručení s odlišnou nabídkou zboží', 'Delivery area with a different product range', 'Khu vực giao hàng có danh mục sản phẩm khác'],
