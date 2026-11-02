@@ -4,8 +4,8 @@ window.MockData = {
   /* four roles per company (REG-12); one role per user + a list of locations the user can buy for */
   roles: {
     owner: { label: 'Vlastník', desc: 'Nejvyšší role. Spravuje vše, včetně dalších vlastníků. Ve firmě vždy zůstává alespoň jeden.' },
-    admin: { label: 'Správce účtu', desc: 'Spravuje firmu, kolegy, provozovny a platby. Nemůže měnit ani odebrat vlastníka.' },
-    buyer: { label: 'Nákupčí', desc: 'Nakupuje pro přiřazené provozovny. Nastavení firmy vidí jen ke čtení.' },
+    admin: { label: 'Správce účtu', desc: 'Spravuje firmu, kolegy, dodací adresy a platby. Nemůže měnit ani odebrat vlastníka.' },
+    buyer: { label: 'Nákupčí', desc: 'Nakupuje pro přiřazené dodací adresy. Nastavení firmy vidí jen ke čtení.' },
     viewer: { label: 'Prohlížející', desc: 'Vidí objednávky a nastavení firmy, ale nenakupuje ani nic nemění.' }
   },
   /* business segments are an administrable list (REG-31); it drives the starter catalogue */
@@ -71,45 +71,44 @@ window.MockData = {
     proofDocs: [{ id: 'p1', name: 'Výpis z obchodního rejstříku.pdf', date: '2. 9. 2026' }],
     proofMin: 1, proofMax: 3
   },
-  sites: [
-    { id: 's1', name: 'Restaurace U Mostu', tradeName: '', contact: 'Jana Nováková', phone: '+420 777 111 222',
-      addresses: [
-        { id: 'a1', name: 'Hlavní vchod', address: 'Na Příkopě 15, 110 00 Praha 1', pin: [50, 60], entrance: 'Boční ulice', floor: 'Přízemí', door: '', note: 'Zvonek „Kuchyně“.', main: true, from: '', to: '' },
-        { id: 'a2', name: 'Letní zahrádka', address: 'Na Příkopě 22, 110 00 Praha 1', pin: [42, 48], entrance: 'Vstup z nádvoří', floor: '', door: '', note: '', main: false, from: '2026-05-01', to: '2026-09-30' }
-      ],
-      days: [0, 1, 2, 3, 4], from: '06:00', to: '10:00', restrictions: ['avizo'], note: 'Vjezd z boční ulice.',
-      licence: { kind: 'alcohol', code: 'ALK-2024-0815', expiry: '2026-12-15' }, blocked: false, address: 'Na Příkopě 15, 110 00 Praha 1' },
-    { id: 's2', name: 'Bistro Brno centrum', tradeName: 'Bistro Brno', contact: 'Petr Dvořák', phone: '+420 777 333 444',
-      addresses: [{ id: 'a3', name: 'Provozovna', address: 'Masarykova 28, 602 00 Brno', pin: [40, 45], entrance: 'Zadní dvůr', floor: '', door: 'č. 3', note: '', main: true, from: '', to: '' }],
-      days: [0, 1, 2, 3, 4, 5], from: '07:00', to: '12:00', restrictions: ['rampa', 'vyska'], note: '',
-      licence: { kind: 'none', code: '', expiry: '' }, blocked: false, address: 'Masarykova 28, 602 00 Brno' },
-    { id: 's3', name: 'Hotel Plzeň', tradeName: '', contact: 'Marie Svobodová', phone: '+420 777 555 666',
-      addresses: [{ id: 'a4', name: 'Recepce', address: 'Americká 42, 301 00 Plzeň', pin: [60, 50], entrance: 'Recepce', floor: '', door: '', note: 'Příjem zboží u recepce.', main: true, from: '', to: '' }],
-      days: [1, 3], from: '08:00', to: '14:00', restrictions: [], note: 'Příjem zboží u recepce.',
-      licence: { kind: 'tobacco', code: 'TAB-2025-0042', expiry: '2026-11-20' }, blocked: true, address: 'Americká 42, 301 00 Plzeň' }
+  /* flat list of delivery addresses (no site layer). name = optional "Název provozovny"; licences 0..n per address */
+  addresses: [
+    { id: 'a1', name: 'Restaurace U Mostu', street: 'Na Příkopě 15', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [50, 60], main: true, blocked: false,
+      contact: 'Jana Nováková', phone: '+420 777 111 222', entrance: 'Boční ulice', floor: 'Přízemí', door: '', note: 'Zvonek „Kuchyně“.',
+      days: [0, 1, 2, 3, 4], from: '06:00', to: '10:00', restrictions: ['avizo'], validFrom: '', validTo: '',
+      licences: [{ id: 'l1', kind: 'alcohol', code: 'ALK-2024-0815', expiry: '2026-12-15' }, { id: 'l2', kind: 'tobacco', code: 'TAB-2024-0007', expiry: '2027-06-30' }] },
+    { id: 'a2', name: 'Letní zahrádka', street: 'Na Příkopě 22', city: 'Praha 1', zip: '110 00', country: 'CZ', pin: [42, 48], main: false, blocked: false,
+      contact: 'Jana Nováková', phone: '+420 777 111 222', entrance: 'Vstup z nádvoří', floor: '', door: '', note: '',
+      days: [0, 1, 2, 3, 4], from: '06:00', to: '10:00', restrictions: [], validFrom: '2026-05-01', validTo: '2026-09-30', licences: [] },
+    { id: 'a3', name: 'Bistro Brno', street: 'Masarykova 28', city: 'Brno', zip: '602 00', country: 'CZ', pin: [40, 45], main: false, blocked: false,
+      contact: 'Petr Dvořák', phone: '+420 777 333 444', entrance: 'Zadní dvůr', floor: '', door: 'č. 3', note: '',
+      days: [0, 1, 2, 3, 4, 5], from: '07:00', to: '12:00', restrictions: ['rampa', 'vyska'], validFrom: '', validTo: '', licences: [] },
+    { id: 'a4', name: 'Hotel Plzeň', street: 'Americká 42', city: 'Plzeň', zip: '301 00', country: 'CZ', pin: [60, 50], main: false, blocked: true,
+      contact: 'Marie Svobodová', phone: '+420 777 555 666', entrance: 'Recepce', floor: '', door: '', note: 'Příjem zboží u recepce.',
+      days: [1, 3], from: '08:00', to: '14:00', restrictions: [], validFrom: '', validTo: '', licences: [{ id: 'l3', kind: 'tobacco', code: 'TAB-2025-0042', expiry: '2026-11-20' }] }
   ],
   /* status: active | invited | blocked (shown as Deaktivovaný) */
   users: [
-    { id: 'u1', email: 'majitel@ukazkova-firma.example', first: 'Ondřej', last: 'Ukázkový', phone: '+420 777 100 001', role: 'owner', sites: 'all', status: 'active', lastActive: '16. 10. 2026',
+    { id: 'u1', email: 'majitel@ukazkova-firma.example', first: 'Ondřej', last: 'Ukázkový', phone: '+420 777 100 001', role: 'owner', addresses: 'all', status: 'active', lastActive: '16. 10. 2026',
       limit: null, approval: false, approver: '', gdpr: { date: '2. 9. 2026', version: '3.0', stats: true }, marketing: { on: true, channels: ['email', 'phone'], date: '2. 9. 2026' } },
-    { id: 'u6', email: 'sprava@ukazkova-firma.example', first: 'Lenka', last: 'Správcová', phone: '+420 777 100 006', role: 'admin', sites: 'all', status: 'active', lastActive: '15. 10. 2026',
+    { id: 'u6', email: 'sprava@ukazkova-firma.example', first: 'Lenka', last: 'Správcová', phone: '+420 777 100 006', role: 'admin', addresses: 'all', status: 'active', lastActive: '15. 10. 2026',
       limit: null, approval: false, approver: '', gdpr: { date: '10. 9. 2026', version: '3.0', stats: true }, marketing: { on: false, channels: [], date: '' } },
-    { id: 'u2', email: 'jana.novakova@ukazkova-firma.example', first: 'Jana', last: 'Nováková', phone: '+420 777 111 222', role: 'buyer', sites: ['s1'], status: 'active', lastActive: '16. 10. 2026',
+    { id: 'u2', email: 'jana.novakova@ukazkova-firma.example', first: 'Jana', last: 'Nováková', phone: '+420 777 111 222', role: 'buyer', addresses: ['a1', 'a2'], status: 'active', lastActive: '16. 10. 2026',
       limit: 20000, approval: true, approver: 'u1', gdpr: { date: '12. 9. 2026', version: '3.0', stats: false }, marketing: { on: true, channels: ['email'], date: '12. 9. 2026' } },
-    { id: 'u3', email: 'petr.dvorak@ukazkova-firma.example', first: 'Petr', last: 'Dvořák', phone: '+420 777 333 444', role: 'buyer', sites: ['s2'], status: 'active', lastActive: '12. 10. 2026',
+    { id: 'u3', email: 'petr.dvorak@ukazkova-firma.example', first: 'Petr', last: 'Dvořák', phone: '+420 777 333 444', role: 'buyer', addresses: ['a3'], status: 'active', lastActive: '12. 10. 2026',
       limit: null, approval: false, approver: '', gdpr: { date: '12. 9. 2026', version: '3.0', stats: true }, marketing: { on: false, channels: [], date: '' } },
-    { id: 'u7', email: 'eva.ucetni@ukazkova-firma.example', first: 'Eva', last: 'Účetní', phone: '', role: 'viewer', sites: 'all', status: 'active', lastActive: '9. 10. 2026',
+    { id: 'u7', email: 'eva.ucetni@ukazkova-firma.example', first: 'Eva', last: 'Účetní', phone: '', role: 'viewer', addresses: 'all', status: 'active', lastActive: '9. 10. 2026',
       limit: null, approval: false, approver: '', gdpr: { date: '15. 9. 2026', version: '3.0', stats: false }, marketing: { on: false, channels: [], date: '' } },
-    { id: 'u4', email: 'ucetni@ukazkova-firma.example', first: '', last: '', phone: '', role: 'viewer', sites: 'all', status: 'invited', lastActive: '',
+    { id: 'u4', email: 'ucetni@ukazkova-firma.example', first: '', last: '', phone: '', role: 'viewer', addresses: 'all', status: 'invited', lastActive: '',
       limit: null, approval: false, approver: '', gdpr: null, marketing: { on: false, channels: [], date: '' } },
-    { id: 'u5', email: 'marie.svobodova@ukazkova-firma.example', first: 'Marie', last: 'Svobodová', phone: '+420 777 555 666', role: 'buyer', sites: ['s3'], status: 'blocked', lastActive: '2. 8. 2026',
+    { id: 'u5', email: 'marie.svobodova@ukazkova-firma.example', first: 'Marie', last: 'Svobodová', phone: '+420 777 555 666', role: 'buyer', addresses: ['a4'], status: 'blocked', lastActive: '2. 8. 2026',
       limit: null, approval: false, approver: '', gdpr: { date: '12. 9. 2026', version: '3.0', stats: false }, marketing: { on: false, channels: [], date: '' } }
   ],
   orders: [
-    { id: '2026-104512', date: '14. 10. 2026', site: 's1', total: 18420, status: 'Doručeno' },
-    { id: '2026-104377', date: '12. 10. 2026', site: 's2', total: 9860, status: 'Doručeno' },
-    { id: '2026-104201', date: '9. 10. 2026', site: 's1', total: 22150, status: 'Doručeno' },
-    { id: '2026-104688', date: '16. 10. 2026', site: 's2', total: 12340, status: 'Na cestě' }
+    { id: '2026-104512', date: '14. 10. 2026', address: 'a1', total: 18420, status: 'Doručeno' },
+    { id: '2026-104377', date: '12. 10. 2026', address: 'a3', total: 9860, status: 'Doručeno' },
+    { id: '2026-104201', date: '9. 10. 2026', address: 'a1', total: 22150, status: 'Doručeno' },
+    { id: '2026-104688', date: '16. 10. 2026', address: 'a3', total: 12340, status: 'Na cestě' }
   ],
   credits: { balance: 12500, history: [
     { date: '2. 10. 2026', text: 'Dobití firemních kreditů', amount: 15000 },
@@ -124,10 +123,11 @@ window.MockData.restrictionLabels = {
   zakaz: 'Zákaz vjezdu nákladních vozidel'
 };
 window.MockData.addressSuggestions = [
-  'Na Příkopě 15, 110 00 Praha 1', 'Na Příkopě 22, 110 00 Praha 1', 'Evropská 2758/11, 160 00 Praha 6',
-  'Masarykova 28, 602 00 Brno', 'Masarykova 5, 602 00 Brno', 'Americká 42, 301 00 Plzeň',
-  'Náměstí Republiky 1, 306 32 Plzeň', 'Zlatnická 10, 110 00 Praha 1'
+  { street: 'Na Příkopě 15', city: 'Praha 1', zip: '110 00' }, { street: 'Na Příkopě 22', city: 'Praha 1', zip: '110 00' }, { street: 'Evropská 2758/11', city: 'Praha 6', zip: '160 00' },
+  { street: 'Masarykova 28', city: 'Brno', zip: '602 00' }, { street: 'Masarykova 5', city: 'Brno', zip: '602 00' }, { street: 'Americká 42', city: 'Plzeň', zip: '301 00' },
+  { street: 'Náměstí Republiky 1', city: 'Plzeň', zip: '306 32' }, { street: 'Zlatnická 10', city: 'Praha 1', zip: '110 00' }
 ];
+window.MockData.countries = [{ value: 'CZ', label: 'Česko' }, { value: 'SK', label: 'Slovensko' }, { value: 'PL', label: 'Polsko' }, { value: 'DE', label: 'Německo' }, { value: 'AT', label: 'Rakousko' }, { value: 'HU', label: 'Maďarsko' }];
 /* per-user settings (docs/DATA-MODEL-DRAFT.md section 3): display toggles, SSO identities, e-mail verification, password */
 window.MockData.users.forEach(u => Object.assign(u, {
   display: { vat: 'excl', pack: 'piece', unit: 'kg' },

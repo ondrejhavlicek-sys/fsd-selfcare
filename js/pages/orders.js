@@ -12,8 +12,8 @@
         <page-state title="Objednávky">
           <ds-message variant="info" class="mb" :title="t('Zástupný přehled')" :body="t('Historie objednávek je v této verzi prototypu jen ukázka.')"></ds-message>
           <ds-table v-if="list.length" class="acct-tbl">
-            <thead><tr><th>{{ t('Číslo') }}</th><th>{{ t('Datum') }}</th><th>{{ t('Provozovna') }}</th><th>{{ t('Částka') }}</th><th>{{ t('Stav') }}</th></tr></thead>
-            <tbody><tr v-for="o in list" :key="o.id"><td :data-label="t('Číslo')"><b>{{ o.id }}</b></td><td :data-label="t('Datum')">{{ o.date }}</td><td :data-label="t('Provozovna')">{{ App.siteName(o.site) }}</td>
+            <thead><tr><th>{{ t('Číslo') }}</th><th>{{ t('Datum') }}</th><th>{{ t('Dodací adresa') }}</th><th>{{ t('Částka') }}</th><th>{{ t('Stav') }}</th></tr></thead>
+            <tbody><tr v-for="o in list" :key="o.id"><td :data-label="t('Číslo')"><b>{{ o.id }}</b></td><td :data-label="t('Datum')">{{ o.date }}</td><td :data-label="t('Dodací adresa')">{{ App.addressName(o.address) }}</td>
               <td :data-label="t('Částka')">{{ kc(o.total) }}</td><td :data-label="t('Stav')"><product-tag :variant="o.status === 'Doručeno' ? 'green' : 'neutral'" :label="t(o.status)"></product-tag></td></tr></tbody>
           </ds-table>
           <empty-state v-else title="Zatím tu nemáte žádnou objednávku" text="Až nakoupíte, uvidíte tady přehled svých objednávek."></empty-state>

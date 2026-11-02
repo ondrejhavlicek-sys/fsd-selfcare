@@ -6,7 +6,7 @@
   const I = KosikUI.icons;
   const t = s => { void App.S.lang; return I18N.t(s); };
   const state = reactive({ mobile: false });
-  const COMPANY_LINKS = ['company', 'sites', 'users', 'payments', 'contracts'];
+  const COMPANY_LINKS = ['company', 'addresses', 'users', 'payments', 'contracts'];
   const USER_LINKS = ['personal', 'security', 'privacy', 'notifications'];
 
   const AcctMenu = {

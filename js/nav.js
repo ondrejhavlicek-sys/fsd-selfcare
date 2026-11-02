@@ -111,11 +111,11 @@
 
   window.Nav = {
     sync(r) {
-      const mobile = matchMedia('(max-width: 768px)').matches, tot = App.cart.totals(), site = App.currentSite();
+      const mobile = matchMedia('(max-width: 768px)').matches, tot = App.cart.totals(), site = App.currentAddress();
       Object.assign(state, {
         cur: r.shop === 'home' ? 'home' : r.shop === 'lists' ? 'lists' : r.id === 'orders' ? 'orders' : '',
         lang: App.S.lang, langs: App.LANGS, count: App.cart.count(), net: App.fmt(tot.net), gross: App.fmt(tot.gross),
-        items: App.cart.items(), siteName: site ? site.name : '', mobile
+        items: App.cart.items(), siteName: site ? App.addrTitle(site) : '', mobile
       });
       if (!mobile) state.cartOpen = false;
     },

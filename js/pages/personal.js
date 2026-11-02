@@ -30,7 +30,7 @@
           <section class="acct-card">
             <div class="rows"><h2>{{ t('Jméno a kontakt') }}</h2>
               <dl class="kv"><dt>{{ t('Jméno') }}</dt><dd><b>{{ me.first }} {{ me.last }}</b></dd><dt>{{ t('Telefon') }}</dt><dd>{{ me.phone || '—' }}</dd><dt>{{ t('Přihlašovací e-mail') }}</dt><dd>{{ me.email }}</dd><dt>{{ t('Role') }}</dt><dd>{{ t(MockData.roles[me.role].label) }}</dd></dl>
-              <span class="muted src">{{ t('Roli a přístup k provozovnám nastavuje správce firmy.') }}</span></div>
+              <span class="muted src">{{ t('Roli a přístup k dodacím adresám nastavuje správce firmy.') }}</span></div>
             <ds-icon-button variant="ghost" size="sm" :icon="I.EditSolid" :aria-label="t('Upravit') + ': ' + t('osobní údaje')" @click="open"></ds-icon-button>
           </section>
 

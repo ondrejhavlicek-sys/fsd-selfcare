@@ -10,8 +10,8 @@
   const owners = () => App.S.users.filter(x => x.role === 'owner' && x.status !== 'blocked');
 
   const sitesText = u => {
-    if (wide(u.role) || u.sites === 'all') return 'Všechny provozovny';
-    return u.sites.length ? u.sites.map(App.siteName).join(', ') : 'Žádná provozovna';
+    if (wide(u.role) || u.addresses === 'all') return 'Všechny dodací adresy';
+    return u.addresses.length ? u.addresses.map(id => t(App.addressName(id))).join(', ') : 'Žádná dodací adresa';
   };
 
   App.register('users', {
@@ -19,18 +19,18 @@
     comp: {
       setup() {
         const list = computed(() => App.list(App.S.users));
-        const f = reactive({ open: false, id: null, email: '', first: '', last: '', phone: '', role: 'buyer', scope: 'all', sites: [], limit: '', approval: false, approver: '', err: {} });
+        const f = reactive({ open: false, id: null, email: '', first: '', last: '', phone: '', role: 'buyer', scope: 'all', addresses: [], limit: '', approval: false, approver: '', err: {} });
         const roles = computed(() => Object.keys(MockData.roles).filter(k => k !== 'owner' || App.isOwner()).reduce((o, k) => (o[k] = MockData.roles[k], o), {}));
         const approvers = computed(() => App.S.users.filter(u => wide(u.role) && u.status === 'active').map(u => ({ value: u.id, label: (u.first + ' ' + u.last).trim() || u.email })));
         const locked = u => u.role === 'owner' && !App.isOwner();
         const openForm = u => {
-          const all = !u || wide(u.role) || u.sites === 'all';
+          const all = !u || wide(u.role) || u.addresses === 'all';
           Object.assign(f, { open: true, id: u ? u.id : null, err: {}, email: u ? u.email : '', first: u ? u.first : '', last: u ? u.last : '', phone: u ? u.phone : '',
-            role: u ? u.role : 'buyer', scope: all ? 'all' : 'some', sites: all ? [] : u.sites.slice(), limit: u && u.limit ? String(u.limit) : '', approval: u ? !!u.approval : false, approver: u ? u.approver : '' });
+            role: u ? u.role : 'buyer', scope: all ? 'all' : 'some', addresses: all ? [] : u.addresses.slice(), limit: u && u.limit ? String(u.limit) : '', approval: u ? !!u.approval : false, approver: u ? u.approver : '' });
         };
         const collect = base => {
           base.first = f.first.trim(); base.last = f.last.trim(); base.phone = f.phone.trim(); base.role = f.role;
-          base.sites = wide(f.role) || f.scope === 'all' ? 'all' : f.sites.slice();
+          base.addresses = wide(f.role) || f.scope === 'all' ? 'all' : f.addresses.slice();
           base.limit = f.role === 'buyer' && f.limit ? +f.limit : null; base.approval = f.role === 'buyer' && !!f.limit && f.approval; base.approver = base.approval ? f.approver : '';
         };
         const submit = () => {
@@ -51,7 +51,7 @@
             collect(u); f.open = false; toast('Změny jsou uložené.');
           }
         };
-        const toggleSite = (id, on) => { f.sites = on ? f.sites.concat(id) : f.sites.filter(x => x !== id); };
+        const toggleAddr = (id, on) => { f.addresses = on ? f.addresses.concat(id) : f.addresses.filter(x => x !== id); };
         const resend = u => toast('Pozvánka byla odeslána znovu na ' + u.email + '.');
         const block = u => {
           if (u.status === 'blocked') { u.status = 'active'; return toast('Kolega je znovu aktivní.'); }
@@ -67,7 +67,7 @@
             onYes: () => { App.S.users = App.S.users.filter(x => x.id !== u.id); toast('Kolega je odebraný.'); } });
         };
         const name = u => (u.first + ' ' + u.last).trim();
-        return { App, I, t, list, f, roles, approvers, STATUS, wide, kc, sitesText, locked, name, openForm, submit, toggleSite, resend, block, del, MockData };
+        return { App, I, t, list, f, roles, approvers, STATUS, wide, kc, sitesText, locked, name, openForm, submit, toggleAddr, resend, block, del, MockData };
       },
       template: `
         <page-state title="Uživatelé">
@@ -78,14 +78,14 @@
               <template #action><ds-button variant="secondary" size="sm" as="a" href="#/ucet/company">{{ t('Otevřít Firemní informace') }}</ds-button></template>
             </ds-message>
             <ds-table v-if="list.length" class="acct-tbl">
-              <thead><tr><th>{{ t('E-mail') }}</th><th>{{ t('Jméno') }}</th><th>{{ t('Role') }}</th><th>{{ t('Provozovny') }}</th><th>{{ t('Stav') }}</th><th><span class="sr">{{ t('Akce kolegy') }}</span></th></tr></thead>
+              <thead><tr><th>{{ t('E-mail') }}</th><th>{{ t('Jméno') }}</th><th>{{ t('Role') }}</th><th>{{ t('Dodací adresy') }}</th><th>{{ t('Stav') }}</th><th><span class="sr">{{ t('Akce kolegy') }}</span></th></tr></thead>
               <tbody>
                 <tr v-for="u in list" :key="u.id">
                   <td :data-label="t('E-mail')"><span class="email">{{ u.email }}</span></td>
                   <td :data-label="t('Jméno')">{{ name(u) || '—' }}<span v-if="u.phone" class="cell-sub">{{ u.phone }}</span></td>
                   <td :data-label="t('Role')">{{ t(MockData.roles[u.role].label) }}
                     <span v-if="u.limit" class="cell-sub">{{ t('Limit objednávky') }}: {{ kc(u.limit) }}<later-tag></later-tag></span></td>
-                  <td :data-label="t('Provozovny')">{{ t(sitesText(u)) }}</td>
+                  <td :data-label="t('Dodací adresy')">{{ t(sitesText(u)) }}</td>
                   <td :data-label="t('Stav')"><product-tag :variant="STATUS[u.status][1]" :label="t(STATUS[u.status][0])"></product-tag>
                     <span v-if="u.status === 'invited'" class="cell-sub">{{ t('Do ověření e-mailu nemůže objednávat.') }}</span>
                     <span v-else-if="u.lastActive" class="cell-sub">{{ t('Poslední aktivita') }}: {{ u.lastActive }}</span></td>
@@ -123,15 +123,15 @@
                 <ds-field-message v-if="f.err.role" role="alert" class="fld-err">{{ t(f.err.role) }}</ds-field-message>
               </fieldset>
               <fieldset v-if="!wide(f.role)" class="fset">
-                <legend class="lbl-t">{{ t('Provozovny, pro které smí nakupovat') }}</legend>
+                <legend class="lbl-t">{{ t('Dodací adresy, pro které smí nakupovat') }}</legend>
                 <ds-radio-group v-model="f.scope" class="radios">
-                  <ds-inline-field-label class="acct-radio" for="scope-all"><ds-radio id="scope-all" value="all"></ds-radio><template #label>{{ t('Všechny provozovny') }}</template></ds-inline-field-label>
-                  <ds-inline-field-label class="acct-radio" for="scope-some"><ds-radio id="scope-some" value="some"></ds-radio><template #label>{{ t('Jen vybrané provozovny') }}</template></ds-inline-field-label>
+                  <ds-inline-field-label class="acct-radio" for="scope-all"><ds-radio id="scope-all" value="all"></ds-radio><template #label>{{ t('Všechny dodací adresy') }}</template></ds-inline-field-label>
+                  <ds-inline-field-label class="acct-radio" for="scope-some"><ds-radio id="scope-some" value="some"></ds-radio><template #label>{{ t('Jen vybrané dodací adresy') }}</template></ds-inline-field-label>
                 </ds-radio-group>
                 <div v-if="f.scope === 'some'" class="site-pick">
-                  <ds-inline-field-label v-for="s in App.S.sites" :key="s.id" class="acct-radio" :for="'sp-' + s.id">
-                    <ds-checkbox :id="'sp-' + s.id" :checked="f.sites.includes(s.id)" @update:checked="toggleSite(s.id, $event)"></ds-checkbox>
-                    <template #label>{{ s.name }}<span v-if="s.blocked" class="muted"> ({{ t('deaktivovaná') }})</span></template>
+                  <ds-inline-field-label v-for="s in App.S.addresses" :key="s.id" class="acct-radio" :for="'sp-' + s.id">
+                    <ds-checkbox :id="'sp-' + s.id" :checked="f.addresses.includes(s.id)" @update:checked="toggleAddr(s.id, $event)"></ds-checkbox>
+                    <template #label>{{ App.addrTitle(s) }}<span v-if="s.blocked" class="muted"> ({{ t('deaktivovaná') }})</span></template>
                   </ds-inline-field-label>
                 </div>
               </fieldset>

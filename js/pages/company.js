@@ -67,7 +67,7 @@
           <section class="acct-card">
             <div class="rows"><h2>{{ t('Obchodní název') }}</h2>
               <span>{{ c.tradeName || t('Nezadáno') }}</span>
-              <span class="muted">{{ t('Zobrazí se u všech provozoven, které nemají vlastní obchodní název.') }}</span></div>
+              <span class="muted">{{ t('Zobrazí se u dodacích adres, které nemají vlastní název provozovny.') }}</span></div>
             <ds-icon-button v-if="App.isAdmin()" variant="ghost" size="sm" :icon="I.EditSolid" :aria-label="t('Upravit') + ': ' + t('obchodní název')" @click="open('trade')"></ds-icon-button>
           </section>
 
@@ -120,7 +120,7 @@
               <field v-if="f.seatDiff" label="Adresa sídla" req v-model="f.seat" :error="f.err.seat"></field>
             </template>
             <template v-else-if="f.kind === 'trade'">
-              <field label="Obchodní název" v-model="f.trade" placeholder="např. Restaurace U Mostu" hint="Nepovinné. Zobrazí se u provozoven bez vlastního názvu."></field>
+              <field label="Obchodní název" v-model="f.trade" placeholder="např. Restaurace U Mostu" hint="Nepovinné. Zobrazí se u dodacích adres bez vlastního názvu provozovny."></field>
             </template>
             <template v-else-if="f.kind === 'segment'">
               <sel-field label="Obor podnikání" v-model="f.segment" :options="segs"></sel-field>

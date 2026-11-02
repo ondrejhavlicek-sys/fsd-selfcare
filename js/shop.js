@@ -82,7 +82,7 @@
     }
   });
   App.on('l-add', el => {
-    if (!App.currentSite()) return toast('Nejdřív vyberte aktivní provozovnu.');
+    if (!App.currentAddress()) return toast('Nejdřív vyberte aktivní dodací adresu.');
     if (App.S.role === 'viewer') return toast('S rolí Prohlížející nemůžete nakupovat.');
     const l = App.S.lists.find(x => x.id === el.dataset.id); l.items.forEach(it => App.cart.set(it.pid, App.cart.qty(it.pid) + it.qty));
     App.render(); toast('Položky ze seznamu jsou v košíku.');

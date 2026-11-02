@@ -10,9 +10,9 @@
 
   const state = reactive({ route: { id: 'company', hub: false }, mobile: false, dlg: null, req: { open: false, topic: '', note: '', err: '' } });
 
-  /* sidebar groups (kosik.cz profile structure; Provozovny and Role are our additions in "Firemní profil") */
+  /* sidebar groups (kosik.cz profile structure; Dodací adresy and Role are our additions in "Firemní profil") */
   const GROUPS = [
-    { key: 'company', label: 'Firemní profil', pages: ['company', 'authorized', 'sites', 'users', 'roles', 'payments', 'contracts', 'terms'] },
+    { key: 'company', label: 'Firemní profil', pages: ['company', 'authorized', 'addresses', 'users', 'roles', 'payments', 'contracts', 'terms'] },
     { key: 'shop', label: 'Nakupování', pages: ['orders', 'credits', 'savings', 'lists', 'favorites'] },
     { key: 'user', label: 'Uživatelský účet', pages: ['personal', 'security', 'privacy', 'notifications'] }
   ];
