@@ -57,15 +57,35 @@
     return { id: App.pages[rid] ? rid : 'company' };
   }
 
+  /* the header address label: "Název provozovny" (only if set) + street, zip city of the effective current address */
+  function addrParts() {
+    const a = App.currentAddress();
+    return a ? { name: a.name || '', line: App.addrLine(a) } : { name: '', line: 'Žádná dodací adresa' };
+  }
+  function patchAddr() {
+    const p = addrParts();
+    document.querySelectorAll('.ha-name').forEach(e => { if (e.textContent !== p.name) e.textContent = p.name; });
+    document.querySelectorAll('.ha-line').forEach(e => { const v = I18N.t(p.line); if (e.textContent !== v) e.textContent = v; });
+  }
+  /* keeps the header, the stored choice and App.S.addressId in sync with the data, whatever changes it (islands included) */
+  Vue.watchEffect(() => {
+    if (!App.S.addresses) return;
+    const cur = App.currentAddress();
+    if (cur && App.S.addressId !== cur.id) App.S.addressId = cur.id;   /* selected one was deactivated/removed/no longer allowed */
+    patchAddr();
+    if (cur && booted) store.set('sc-address', cur.id);
+  });
+
   /* ---------- shared shell ---------- */
   function header() {
     const S = App.S, c = S.company, site = App.currentAddress();
-    const addrLabel = site ? App.addrLine(site) : 'Žádná dodací adresa';
+    const ap = addrParts();
+    const addrLabel = `<span class="ha-name">${esc(ap.name)}</span><span class="ha-line">${esc(ap.line)}</span>`;
     const sf = cls => `<form class="${cls}" role="search" data-search><input type="search" name="q" value="${esc(S.query || '')}" placeholder="Hledejte produkt, kategorii nebo značku" aria-label="Hledat" autocomplete="off"><button type="button" class="mic" data-act="mic" aria-label="Hlasové vyhledávání">${img('mic')}</button><button class="go" type="submit" aria-label="Hledat">${img('search')}</button></form>`;
     return `<header class="hdr">
       <div class="hdr-left">
         <a class="brand" href="#/" data-act="clear-search"><span class="logo">makro</span><span>distribuce</span></a>
-        <button class="hdr-addr" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span><small>Vybraná dodací adresa</small><b>${esc(addrLabel)}</b></span>${img('chevron-right')}</button>
+        <button class="hdr-addr" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span><small>Vybraná dodací adresa</small><b>${addrLabel}</b></span>${img('chevron-right')}</button>
       </div>
       ${sf('hdr-search')}
       <div class="hdr-actions">
@@ -73,7 +93,7 @@
         <div id="acct-menu-slot"></div>
       </div></header>
       ${sf('m-search')}
-      <button class="deliv-bar" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span>Doručení: <b>${esc(addrLabel)}</b></span>${img('chevron-down')}</button>`;
+      <button class="deliv-bar" data-act="addr" aria-haspopup="dialog" aria-expanded="${AddrDrawer.isOpen()}"><span>Doručení: <b>${addrLabel}</b></span>${img('chevron-down')}</button>`;
   }
 
   /* the navigation bar is a Fresh Vue island (js/nav.js); the shell only leaves a slot for it */
@@ -158,7 +178,7 @@
       logout() { e.preventDefault(); App.S.pop = false; render(); UI.toast('Odhlášení není součástí prototypu.'); },
       scn() { App.S.scn = !App.S.scn; render(); },
       retry() { App.S.scenario = 'normal'; render(); },
-      reset() { const keep = { role: App.S.role, scenario: App.S.scenario, type: App.S.type, scn: App.S.scn, lang: App.S.lang }; App.reset(); Object.assign(App.S, keep); render(); UI.toast('Ukázková data jsou obnovena.'); }
+      reset() { App.S.addressId = undefined; store.set('sc-address', ''); const keep = { role: App.S.role, scenario: App.S.scenario, type: App.S.type, scn: App.S.scn, lang: App.S.lang }; App.reset(); Object.assign(App.S, keep); render(); UI.toast('Ukázková data jsou obnovena.'); }
     };
     if (core[act]) core[act](); else if (App.handlers[act]) App.handlers[act](el, e);
   });
@@ -175,6 +195,7 @@
     render();
   });
   window.addEventListener('hashchange', () => { App.S.pop = false; AddrDrawer.close(true); UI.closeDialog(); render(); window.scrollTo(0, 0); });
+  let booted = false;
   let wasMobile = mobile();
   window.addEventListener('resize', () => { if (wasMobile !== mobile()) { wasMobile = mobile(); render(); } });
 
@@ -184,6 +205,7 @@
     const lang = q.get('lang') || store.get('sc-lang');
     App.S.lang = LANGS[lang] ? lang : 'cs';
     I18N.set(App.S.lang);
-    App.reset(); render();
+    App.S.addressId = store.get('sc-address') || undefined;   /* restored, then validated by App.currentAddress() */
+    App.reset(); booted = true; render();
   };
 })();

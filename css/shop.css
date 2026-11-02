@@ -1,7 +1,11 @@
 /* Shop shell + listing (Figma "category page": navy header, light subheader, 205px product cards) */
 .hdr-addr { display: flex; align-items: center; gap: 8px; margin-left: 16px; color: #fff; background: none; border: 0; text-align: left; padding: 8px 0; position: relative; }
 .hdr-addr small { display: block; font-size: 14px; font-weight: 400; line-height: 18px; }
-.hdr-addr b { display: block; font-size: var(--fs-base); font-weight: 600; line-height: 18px; white-space: nowrap; }
+.hdr-addr b { display: block; font-size: var(--fs-base); font-weight: 400; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hdr-addr > span { min-width: 0; max-width: 340px; }
+.ha-name { font-weight: 600; }
+.ha-name:not(:empty)::after { content: " · "; font-weight: 400; }
+.ha-name:empty + .ha-line { font-weight: 600; }
 .hdr-addr img { width: 20px; height: 20px; filter: brightness(0) invert(1); }
 .hdr-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
 .hdr-btns { display: flex; align-items: center; gap: 8px; }
@@ -100,7 +104,8 @@
   .hdr .co-btn span, .hdr .co-btn img.chev { display: none; }
   .hdr .circ, .hdr .co-btn { width: 36px; height: 36px; padding: 0; justify-content: center; }
   .deliv-bar { display: flex; align-items: center; gap: 8px; background: #cddff9; padding: 8px 12px; font-size: 13px; color: var(--navy); width: 100%; border: 0; text-align: left; position: relative; }
-  .deliv-bar b { font-weight: 600; }
+  .deliv-bar > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .deliv-bar b { font-weight: 400; }
   .deliv-bar img { width: 18px; height: 18px; margin-left: auto; }
   .subhdr-in { overflow-x: auto; padding: 0 8px; gap: 8px; height: 52px; scrollbar-width: none; }
   .subhdr-in::-webkit-scrollbar { display: none; }
