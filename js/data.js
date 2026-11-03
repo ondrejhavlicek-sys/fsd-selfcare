@@ -12,7 +12,7 @@ window.MockData = {
   segments: ['Restaurace', 'Kavárna', 'Pizzerie', 'Hotel', 'Bar', 'Obchod', 'Jiné'],
   sizes: ['1–5 zaměstnanců', '6–20 zaměstnanců', '21–100 zaměstnanců', 'Více než 100 zaměstnanců'],
   company: {
-    name: 'Ukázková firma s.r.o.',
+    name: 'Fidel Gastro s.r.o.',
     legalForm: 's.r.o.',
     country: 'CZ',
     ico: '12345678',
